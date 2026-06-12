@@ -27,6 +27,7 @@ This repository is initialized for Phase 0 of the master plan:
 - contractive CTRNN model core with projection and Jacobian diagnostics
 - projected Oja-style plasticity and a small Circle smoke trainer
 - persistent homology metrics for finite point-cloud comparisons
+- stability and invariance diagnostics for synthetic trajectories
 
 Baselines and benchmarks are intentionally not implemented yet.
 
@@ -99,6 +100,8 @@ See [docs/experiments/synthetic_protocol.md](docs/experiments/synthetic_protocol
 for the synthetic data API introduced in Phase 1.
 See [docs/experiments/plasticity_smoke_protocol.md](docs/experiments/plasticity_smoke_protocol.md)
 for the projected-plasticity smoke protocol introduced in Phase 3.
+See [docs/experiments/stability_invariance_protocol.md](docs/experiments/stability_invariance_protocol.md)
+for the stability and invariance diagnostics introduced in Phase 5.
 
 ## Non-Goals for v0.1
 
