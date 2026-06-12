@@ -25,9 +25,9 @@ This repository is initialized for Phase 0 of the master plan:
 - project guidance for research roles and required mathematical tooling
 - synthetic trajectory generators and perturbations
 - contractive CTRNN model core with projection and Jacobian diagnostics
+- projected Oja-style plasticity and a small Circle smoke trainer
 
-Training loops, plasticity, TDA metrics, baselines, and benchmarks are
-intentionally not implemented yet.
+TDA metrics, baselines, and benchmarks are intentionally not implemented yet.
 
 ## Local Setup
 
@@ -96,6 +96,8 @@ See [docs/research_stack.md](docs/research_stack.md) for the working roles,
 mathematical toolkit, and Python dependency rationale.
 See [docs/experiments/synthetic_protocol.md](docs/experiments/synthetic_protocol.md)
 for the synthetic data API introduced in Phase 1.
+See [docs/experiments/plasticity_smoke_protocol.md](docs/experiments/plasticity_smoke_protocol.md)
+for the projected-plasticity smoke protocol introduced in Phase 3.
 
 ## Non-Goals for v0.1
 
