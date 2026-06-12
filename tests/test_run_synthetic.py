@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 
+import torch
 import yaml
 
 from tempora.experiments import load_benchmark_config, run_synthetic_benchmark
@@ -31,20 +32,42 @@ def test_synthetic_smoke_benchmark_writes_metrics_figures_and_report(
 
     result = run_synthetic_benchmark(config)
 
+    assert result.config_path.exists()
     assert result.metrics_path.exists()
     assert result.report_path.exists()
+    assert len(result.checkpoint_paths) == 4
+    resolved_config = yaml.safe_load(result.config_path.read_text(encoding="utf-8"))
+    assert resolved_config["run_id"] == "ci_smoke"
+    assert resolved_config["datasets"] == ["circle", "torus", "lorenz", "rossler"]
+
     payload = json.loads(result.metrics_path.read_text(encoding="utf-8"))
     assert payload["run_id"] == "ci_smoke"
     assert set(payload["datasets"]) == {"circle", "torus", "lorenz", "rossler"}
     assert payload["config"]["epochs"] == 2
+    assert payload["artifacts"]["config"] == str(result.config_path)
+    assert set(payload["artifacts"]["checkpoints"]) == {
+        str(path) for path in result.checkpoint_paths
+    }
     assert payload["dependency_versions"]["torch"] is not None
-    for _dataset_name, dataset_metrics in payload["datasets"].items():
+    for dataset_name, dataset_metrics in payload["datasets"].items():
         assert dataset_metrics["prediction_mse"] >= 0.0
         assert dataset_metrics["contraction_margin_final"] > 0.0
         assert "gru" in dataset_metrics["baselines"]
         assert "vanilla_neural_ode" in dataset_metrics["baselines"]
         assert Path(dataset_metrics["figures"]["input_trajectory"]).exists()
         assert Path(dataset_metrics["figures"]["latent_trajectory"]).exists()
+        checkpoint_path = Path(dataset_metrics["checkpoint"])
+        assert checkpoint_path.exists()
+        checkpoint = torch.load(
+            checkpoint_path,
+            map_location="cpu",
+            weights_only=False,
+        )
+        assert checkpoint["model_class"] == "ContractiveCTRNN"
+        assert checkpoint["dataset"] == dataset_name
+        assert checkpoint["seed"] == dataset_metrics["seed"]
+        assert checkpoint["config"]["run_id"] == "ci_smoke"
+        assert checkpoint["state_dict"]
     assert "## Claims" in result.report_path.read_text(encoding="utf-8")
 
 

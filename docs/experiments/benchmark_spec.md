@@ -48,10 +48,16 @@ The command writes:
 
 ```text
 outputs/<run_id>/
+  config.yaml
   metrics.json
   report.md
   figures/
+  checkpoints/
 ```
+
+`checkpoints/` contains one `*_model.pt` file per dataset in the run. Each
+checkpoint stores the `ContractiveCTRNN` state dict, reconstructable model
+kwargs, the resolved config, seed, dataset name, and training metrics.
 
 ## Expected Failure Modes
 
@@ -62,6 +68,6 @@ outputs/<run_id>/
 
 ## Reproducibility Notes
 
-`metrics.json` stores the seed, config, git commit hash when available,
-dependency versions, and runtime metadata. Generated outputs are ignored by git.
-
+`metrics.json` stores the seed, resolved config, artifact paths, git commit hash
+when available, dependency versions, and runtime metadata. Generated outputs are
+ignored by git.

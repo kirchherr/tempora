@@ -21,8 +21,11 @@ def main() -> None:
     args = parser.parse_args()
     config = load_benchmark_config(Path(args.config))
     result = run_synthetic_benchmark(config)
+    print(result.config_path)
     print(result.metrics_path)
     print(result.report_path)
+    for checkpoint_path in result.checkpoint_paths:
+        print(checkpoint_path)
 
 
 if __name__ == "__main__":

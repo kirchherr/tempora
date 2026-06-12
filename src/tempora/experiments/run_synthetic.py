@@ -68,8 +68,10 @@ class SyntheticBenchmarkResult:
     """Locations and metrics for one synthetic benchmark run."""
 
     output_dir: Path
+    config_path: Path
     metrics_path: Path
     report_path: Path
+    checkpoint_paths: tuple[Path, ...]
     metrics: dict[str, Any]
 
 
@@ -111,8 +113,15 @@ def run_synthetic_benchmark(
 
     started_at = time.perf_counter()
     output_dir = config.output_root / config.run_id
+    output_dir.mkdir(parents=True, exist_ok=True)
     figures_dir = output_dir / "figures"
+    checkpoints_dir = output_dir / "checkpoints"
     figures_dir.mkdir(parents=True, exist_ok=True)
+    checkpoints_dir.mkdir(parents=True, exist_ok=True)
+    config_path = output_dir / "config.yaml"
+    metrics_path = output_dir / "metrics.json"
+    report_path = output_dir / "report.md"
+    write_benchmark_config(config, config_path)
 
     dataset_results: dict[str, Any] = {}
     for offset, dataset_name in enumerate(config.datasets):
@@ -124,12 +133,23 @@ def run_synthetic_benchmark(
             seed=dataset_seed,
             config=config,
             figures_dir=figures_dir,
+            checkpoints_dir=checkpoints_dir,
         )
+    checkpoint_paths = tuple(
+        Path(cast(str, dataset_result["checkpoint"]))
+        for dataset_result in dataset_results.values()
+    )
 
     metrics: dict[str, Any] = {
         "run_id": config.run_id,
         "seed": config.seed,
         "config": config.to_jsonable(),
+        "artifacts": {
+            "config": str(config_path),
+            "metrics": str(metrics_path),
+            "report": str(report_path),
+            "checkpoints": [str(path) for path in checkpoint_paths],
+        },
         "git_commit": current_git_commit(),
         "dependency_versions": dependency_versions(),
         "runtime": {
@@ -139,16 +159,17 @@ def run_synthetic_benchmark(
         },
         "datasets": dataset_results,
     }
-    metrics_path = output_dir / "metrics.json"
-    report_path = output_dir / "report.md"
+    validate_json_metrics(metrics)
     metrics_path.write_text(
         json.dumps(metrics, indent=2, sort_keys=True), encoding="utf-8"
     )
     report_path.write_text(render_benchmark_report(metrics), encoding="utf-8")
     return SyntheticBenchmarkResult(
         output_dir=output_dir,
+        config_path=config_path,
         metrics_path=metrics_path,
         report_path=report_path,
+        checkpoint_paths=checkpoint_paths,
         metrics=metrics,
     )
 
@@ -160,6 +181,7 @@ def run_dataset_benchmark(
     seed: int,
     config: SyntheticBenchmarkConfig,
     figures_dir: Path,
+    checkpoints_dir: Path,
 ) -> dict[str, Any]:
     """Train TEMPORA smoke model and baselines on one synthetic dataset."""
 
@@ -212,10 +234,20 @@ def run_dataset_benchmark(
     contraction_margin_final = float(
         cast(float, training.metrics["contraction_margin_final"])
     )
+    checkpoint_path = checkpoints_dir / f"{dataset_name}_model.pt"
+    save_model_checkpoint(
+        model,
+        checkpoint_path,
+        dataset_name=dataset_name,
+        seed=seed,
+        config=config,
+        training_metrics=training.metrics,
+    )
     result: dict[str, Any] = {
         "dataset": dataset_name,
         "seed": seed,
         "model": "tempora_contractivectrnn",
+        "checkpoint": str(checkpoint_path),
         "prediction_mse": prediction_mse,
         "reconstruction_mse": full_reconstruction_mse,
         "contraction_margin_min": contraction_margin_min,
@@ -245,6 +277,48 @@ def run_dataset_benchmark(
     }
     validate_json_metrics(result)
     return result
+
+
+def write_benchmark_config(config: SyntheticBenchmarkConfig, path: Path) -> None:
+    """Write the resolved benchmark configuration next to generated artifacts."""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        yaml.safe_dump(config.to_jsonable(), sort_keys=True),
+        encoding="utf-8",
+    )
+
+
+def save_model_checkpoint(
+    model: ContractiveCTRNN,
+    path: Path,
+    *,
+    dataset_name: DatasetName,
+    seed: int,
+    config: SyntheticBenchmarkConfig,
+    training_metrics: dict[str, object],
+) -> None:
+    """Save a reconstructable smoke-model checkpoint for one dataset run."""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    torch.save(
+        {
+            "model_class": "ContractiveCTRNN",
+            "model_kwargs": {
+                "input_dim": model.input_dim,
+                "latent_dim": model.latent_dim,
+                "margin": model.margin,
+                "lipschitz": model.lipschitz,
+                "use_torchdiffeq": model.use_torchdiffeq,
+            },
+            "dataset": dataset_name,
+            "seed": seed,
+            "config": config.to_jsonable(),
+            "training_metrics": training_metrics,
+            "state_dict": model.state_dict(),
+        },
+        path,
+    )
 
 
 def encode_dataset(model: ContractiveCTRNN, dataset: TemporalDataset) -> FloatArray:

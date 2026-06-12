@@ -18,8 +18,10 @@ capability.
 - [ ] Run `docker compose run --rm tempora`.
 - [ ] Run `docker compose run --rm tempora python scripts/train_synth.py --config configs/benchmark_smoke.yaml`.
 - [ ] Confirm `outputs/benchmark_smoke/metrics.json` exists after the smoke run.
+- [ ] Confirm `outputs/benchmark_smoke/config.yaml` exists after the smoke run.
 - [ ] Confirm `outputs/benchmark_smoke/report.md` exists after the smoke run.
 - [ ] Confirm generated figures exist under `outputs/benchmark_smoke/figures/`.
+- [ ] Confirm model checkpoints exist under `outputs/benchmark_smoke/checkpoints/`.
 - [ ] Confirm generated outputs are not staged for commit.
 - [ ] Confirm docs and README links resolve.
 - [ ] Confirm theory documents include assumptions, limitations, and related
@@ -43,4 +45,3 @@ capability.
 - [ ] Update `CHANGELOG.md` from `0.1.0-alpha - Unreleased` to the release tag.
 - [ ] Include only results that were generated and reviewed.
 - [ ] Include known limitations and open questions.
-
