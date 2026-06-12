@@ -23,9 +23,11 @@ This repository is initialized for Phase 0 of the master plan:
 - CI workflow
 - conservative MVP and assumptions documentation
 - project guidance for research roles and required mathematical tooling
+- synthetic trajectory generators and perturbations
+- contractive CTRNN model core with projection and Jacobian diagnostics
 
-The model, datasets, metrics, and benchmarks are intentionally not implemented
-yet.
+Training loops, plasticity, TDA metrics, baselines, and benchmarks are
+intentionally not implemented yet.
 
 ## Local Setup
 
