@@ -1,0 +1,14 @@
+run_id: benchmark_smoke
+seed: 42
+output_root: outputs
+datasets:
+  - circle
+  - torus
+  - lorenz
+  - rossler
+n_steps: 32
+epochs: 6
+learning_rate: 0.03
+plasticity_learning_rate: 0.0005
+baseline_epochs: 4
+

@@ -29,8 +29,9 @@ This repository is initialized for Phase 0 of the master plan:
 - persistent homology metrics for finite point-cloud comparisons
 - stability and invariance diagnostics for synthetic trajectories
 - GRU, unconstrained Neural ODE, and reservoir baselines
+- CI-small synthetic smoke benchmark with metrics, figures, and report
 
-Full benchmark reports are intentionally not implemented yet.
+Release packaging is intentionally not implemented yet.
 
 ## Local Setup
 
@@ -105,6 +106,8 @@ See [docs/experiments/stability_invariance_protocol.md](docs/experiments/stabili
 for the stability and invariance diagnostics introduced in Phase 5.
 See [docs/experiments/baseline_comparison_protocol.md](docs/experiments/baseline_comparison_protocol.md)
 for the baseline comparison smoke protocol introduced in Phase 6.
+See [docs/experiments/benchmark_spec.md](docs/experiments/benchmark_spec.md)
+for the synthetic smoke benchmark introduced in Phase 7.
 
 ## Non-Goals for v0.1
 
