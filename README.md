@@ -26,8 +26,9 @@ This repository is initialized for Phase 0 of the master plan:
 - synthetic trajectory generators and perturbations
 - contractive CTRNN model core with projection and Jacobian diagnostics
 - projected Oja-style plasticity and a small Circle smoke trainer
+- persistent homology metrics for finite point-cloud comparisons
 
-TDA metrics, baselines, and benchmarks are intentionally not implemented yet.
+Baselines and benchmarks are intentionally not implemented yet.
 
 ## Local Setup
 
