@@ -25,6 +25,7 @@ All notable changes to TEMPORA will be documented in this file.
 - Added a CI smoke-benchmark gate with read-only workflow permissions.
 - Added automated local Markdown link checks for README and docs.
 - Added example YAML configs for synthetic datasets and the contractive CTRNN.
+- Added machine-readable sufficient-contraction proof certificates.
 - Added reusable checkpoint save/load helpers for contractive CTRNN artifacts.
 - Added conservative theory documentation for contraction, projected learning
   stability, and persistence-diagram comparison.

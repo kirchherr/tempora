@@ -63,6 +63,8 @@ contraction of the latent dynamics with respect to `z`.
 - `src/tempora/models/contractive_ctrnn.py` exposes
   `sufficient_contraction_margin` and `project_recurrent_weight_`.
 - `src/tempora/metrics/contraction.py` exposes `model_contraction_margin`.
+- `src/tempora/proof/certificates.py` exposes JSON-serializable sufficient
+  contraction certificates for review artifacts.
 - `src/tempora/metrics/jacobian.py` provides sampled symmetric-Jacobian
   diagnostics. These are local numerical checks, not a replacement for the
   sufficient spectral condition.
@@ -90,4 +92,4 @@ and the explicit margin used by the implementation.
 
 - `tests/test_projection.py`
 - `tests/test_contractive_ctrnn.py`
-
+- `tests/test_proof_certificates.py`
