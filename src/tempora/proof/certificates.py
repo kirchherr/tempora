@@ -7,8 +7,12 @@ from typing import Any, Protocol
 
 import torch
 
+from tempora.models.plasticity import PlasticityLog
 from tempora.models.projections import contraction_margin, spectral_norm
-from tempora.proof.assumptions import CONTRACTION_ASSUMPTIONS
+from tempora.proof.assumptions import (
+    CONTRACTION_ASSUMPTIONS,
+    LEARNING_STABILITY_ASSUMPTIONS,
+)
 
 
 class SupportsContractionCertificate(Protocol):
@@ -46,6 +50,29 @@ class ContractionCertificate:
         return payload
 
 
+@dataclass(frozen=True)
+class LearningStabilityCertificate:
+    """JSON-serializable certificate for one projected learning update."""
+
+    theorem: str
+    margin_before: float
+    margin_after: float
+    required_margin: float
+    weight_norm_before: float
+    weight_norm_after: float
+    update_norm: float
+    is_certified: bool
+    assumptions: tuple[str, ...]
+    limitation: str
+
+    def to_jsonable(self) -> dict[str, Any]:
+        """Return a JSON-serializable representation of the certificate."""
+
+        payload = asdict(self)
+        payload["assumptions"] = list(self.assumptions)
+        return payload
+
+
 def certify_model_contraction(
     model: SupportsContractionCertificate,
     *,
@@ -59,6 +86,37 @@ def certify_model_contraction(
         recurrent_weights=model.recurrent_weight,
         lipschitz=model.lipschitz,
         required_margin=resolved_margin,
+    )
+
+
+def certify_projected_update_stability(
+    log: PlasticityLog,
+    *,
+    required_margin: float,
+) -> LearningStabilityCertificate:
+    """Certify that one projected update preserved the required margin.
+
+    The certificate is based on `PlasticityLog.margin_after`. It does not claim
+    that the unprojected plasticity update is stable.
+    """
+
+    if required_margin < 0.0:
+        raise ValueError("required_margin must be non-negative.")
+    return LearningStabilityCertificate(
+        theorem="theorem_02_projected_learning_stability",
+        margin_before=log.margin_before,
+        margin_after=log.margin_after,
+        required_margin=float(required_margin),
+        weight_norm_before=log.weight_norm_before,
+        weight_norm_after=log.weight_norm_after,
+        update_norm=log.update_norm,
+        is_certified=log.margin_after > float(required_margin),
+        assumptions=LEARNING_STABILITY_ASSUMPTIONS,
+        limitation=(
+            "Post-projection stability certificate only; does not prove "
+            "convergence, optimality, semantic preservation, or stability of "
+            "the unprojected update path."
+        ),
     )
 
 
