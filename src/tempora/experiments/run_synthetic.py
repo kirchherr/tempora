@@ -32,6 +32,7 @@ from tempora.experiments.evaluate_stability import (
 )
 from tempora.experiments.evaluate_topology import evaluate_topology_pair
 from tempora.metrics import (
+    compute_persistence_diagrams,
     estimate_largest_lyapunov,
     missing_segment_robustness_score,
     noise_robustness_score,
@@ -40,6 +41,7 @@ from tempora.metrics import (
 )
 from tempora.models import ContractiveCTRNN
 from tempora.training import train_circle_next_step
+from tempora.viz import plot_persistence_diagram
 
 
 @dataclass(frozen=True)
@@ -211,8 +213,20 @@ def run_dataset_benchmark(
 
     input_figure = figures_dir / f"{dataset_name}_input_trajectory.png"
     latent_figure = figures_dir / f"{dataset_name}_latent_trajectory.png"
+    input_persistence_figure = figures_dir / f"{dataset_name}_persistence_input.png"
+    latent_persistence_figure = figures_dir / f"{dataset_name}_persistence_latent.png"
     save_trajectory_figure(dataset, input_figure)
     save_point_figure(latent, latent_figure, title=f"{dataset_name} latent")
+    save_persistence_figure(
+        dataset.observations,
+        input_persistence_figure,
+        title=f"{dataset_name} input H1 persistence",
+    )
+    save_persistence_figure(
+        latent,
+        latent_persistence_figure,
+        title=f"{dataset_name} latent H1 persistence",
+    )
 
     baselines: list[TemporalModelProtocol] = [
         GRUBaseline(hidden_dim=8, epochs=config.baseline_epochs, learning_rate=0.03),
@@ -273,6 +287,8 @@ def run_dataset_benchmark(
         "figures": {
             "input_trajectory": str(input_figure),
             "latent_trajectory": str(latent_figure),
+            "persistence_input": str(input_persistence_figure),
+            "persistence_latent": str(latent_persistence_figure),
         },
     }
     validate_json_metrics(result)
@@ -418,6 +434,24 @@ def save_point_figure(points: FloatArray, path: Path, *, title: str) -> None:
     axis.set_title(title)
     axis.set_xlabel("x")
     axis.set_ylabel("y")
+    figure.tight_layout()
+    figure.savefig(path, dpi=120)
+    plt.close(figure)
+
+
+def save_persistence_figure(points: FloatArray, path: Path, *, title: str) -> None:
+    """Save an H1 persistence diagram for a finite point cloud."""
+
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    result = compute_persistence_diagrams(points, maxdim=1)
+    figure = cast(Any, plot_persistence_diagram(result, homology_dim=1))
+    if figure.axes:
+        figure.axes[0].set_title(title)
     figure.tight_layout()
     figure.savefig(path, dpi=120)
     plt.close(figure)

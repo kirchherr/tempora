@@ -56,6 +56,8 @@ def test_synthetic_smoke_benchmark_writes_metrics_figures_and_report(
         assert "vanilla_neural_ode" in dataset_metrics["baselines"]
         assert Path(dataset_metrics["figures"]["input_trajectory"]).exists()
         assert Path(dataset_metrics["figures"]["latent_trajectory"]).exists()
+        assert Path(dataset_metrics["figures"]["persistence_input"]).exists()
+        assert Path(dataset_metrics["figures"]["persistence_latent"]).exists()
         checkpoint_path = Path(dataset_metrics["checkpoint"])
         assert checkpoint_path.exists()
         checkpoint = torch.load(

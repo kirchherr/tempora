@@ -17,6 +17,7 @@ All notable changes to TEMPORA will be documented in this file.
 - Added GRU, unconstrained Neural ODE, and reservoir baselines.
 - Added CI-safe synthetic smoke benchmark with `metrics.json`, figures, and a
   Markdown report.
+- Added benchmark persistence-diagram figures for input and latent point clouds.
 - Added reproducible benchmark artifact snapshots for resolved configs and
   dataset-level model checkpoints.
 - Added conservative theory documentation for contraction, projected learning

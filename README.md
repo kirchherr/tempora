@@ -69,8 +69,8 @@ Regenerate a Markdown report from saved metrics:
 docker compose run --rm tempora python scripts/make_report.py outputs/benchmark_smoke/metrics.json
 ```
 
-Generated metrics, reports, config snapshots, checkpoints, and figures are
-written under `outputs/` and are not committed.
+Generated metrics, reports, config snapshots, checkpoints, trajectory figures,
+and persistence figures are written under `outputs/` and are not committed.
 
 ## Docker Setup
 

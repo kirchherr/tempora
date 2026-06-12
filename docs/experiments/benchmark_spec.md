@@ -55,6 +55,9 @@ outputs/<run_id>/
   checkpoints/
 ```
 
+For each dataset, `figures/` contains input and latent trajectory plots plus
+H1 persistence diagrams for the input and latent point clouds.
+
 `checkpoints/` contains one `*_model.pt` file per dataset in the run. Each
 checkpoint stores the `ContractiveCTRNN` state dict, reconstructable model
 kwargs, the resolved config, seed, dataset name, and training metrics.
