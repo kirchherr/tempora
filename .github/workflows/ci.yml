@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -34,3 +37,11 @@ jobs:
 
       - name: Run mypy
         run: python -m mypy src
+
+      - name: Run synthetic smoke benchmark
+        run: |
+          python scripts/train_synth.py --config configs/benchmark_smoke.yaml
+          python scripts/make_report.py outputs/benchmark_smoke/metrics.json
+          test -f outputs/benchmark_smoke/config.yaml
+          test -f outputs/benchmark_smoke/metrics.json
+          test -f outputs/benchmark_smoke/report.md

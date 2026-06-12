@@ -22,6 +22,7 @@ All notable changes to TEMPORA will be documented in this file.
   dataset-level model checkpoints.
 - Added benchmark report sections for run metadata, artifact paths, and
   dependency versions.
+- Added a CI smoke-benchmark gate with read-only workflow permissions.
 - Added reusable checkpoint save/load helpers for contractive CTRNN artifacts.
 - Added conservative theory documentation for contraction, projected learning
   stability, and persistence-diagram comparison.

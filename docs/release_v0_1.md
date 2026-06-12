@@ -25,6 +25,8 @@ capability.
 - [ ] Confirm model checkpoints exist under `outputs/benchmark_smoke/checkpoints/`.
 - [ ] Confirm generated outputs are not staged for commit.
 - [ ] Confirm docs and README links resolve.
+- [ ] Confirm GitHub Actions CI includes tests, linting, typing, and the smoke
+  benchmark command.
 - [ ] Confirm theory documents include assumptions, limitations, and related
   tests.
 - [ ] Confirm no invented benchmark results are added to docs or changelog.
