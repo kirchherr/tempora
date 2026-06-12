@@ -17,6 +17,8 @@ The default config runs on:
 - Rossler
 
 The smoke defaults are intentionally small and CI-friendly.
+The default smoke config is `configs/benchmark_smoke.yaml`; standalone dataset
+and model examples live in the other `configs/*.yaml` files.
 
 ## Models
 

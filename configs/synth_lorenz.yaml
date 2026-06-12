@@ -1,0 +1,12 @@
+dataset: lorenz
+seed: 103
+n_steps: 512
+duration: 20.0
+sigma: 10.0
+rho: 28.0
+beta: 2.6666666666666665
+initial_state:
+  - 1.0
+  - 1.0
+  - 1.0
+noise_std: 0.0

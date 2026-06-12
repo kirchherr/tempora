@@ -63,6 +63,10 @@ Run the CI-small synthetic smoke benchmark:
 docker compose run --rm tempora python scripts/train_synth.py --config configs/benchmark_smoke.yaml
 ```
 
+Example dataset and model configs live under `configs/`, including
+`synth_circle.yaml`, `synth_torus.yaml`, `synth_lorenz.yaml`,
+`synth_rossler.yaml`, and `contractive_ctrnn.yaml`.
+
 Regenerate a Markdown report from saved metrics:
 
 ```bash
