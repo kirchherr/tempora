@@ -1,11 +1,11 @@
 import json
 from pathlib import Path
 
-import torch
 import yaml
 
 from tempora.experiments import load_benchmark_config, run_synthetic_benchmark
 from tempora.experiments.run_synthetic import render_benchmark_report
+from tempora.training import load_contractive_ctrnn_checkpoint
 
 
 def test_synthetic_smoke_benchmark_writes_metrics_figures_and_report(
@@ -60,16 +60,12 @@ def test_synthetic_smoke_benchmark_writes_metrics_figures_and_report(
         assert Path(dataset_metrics["figures"]["persistence_latent"]).exists()
         checkpoint_path = Path(dataset_metrics["checkpoint"])
         assert checkpoint_path.exists()
-        checkpoint = torch.load(
-            checkpoint_path,
-            map_location="cpu",
-            weights_only=False,
-        )
-        assert checkpoint["model_class"] == "ContractiveCTRNN"
-        assert checkpoint["dataset"] == dataset_name
-        assert checkpoint["seed"] == dataset_metrics["seed"]
-        assert checkpoint["config"]["run_id"] == "ci_smoke"
-        assert checkpoint["state_dict"]
+        checkpoint = load_contractive_ctrnn_checkpoint(checkpoint_path)
+        assert checkpoint.metadata["model_class"] == "ContractiveCTRNN"
+        assert checkpoint.metadata["dataset"] == dataset_name
+        assert checkpoint.metadata["seed"] == dataset_metrics["seed"]
+        assert checkpoint.metadata["config"]["run_id"] == "ci_smoke"
+        assert checkpoint.model.input_dim == checkpoint.model.latent_dim
     assert "## Claims" in result.report_path.read_text(encoding="utf-8")
 
 

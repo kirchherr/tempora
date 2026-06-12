@@ -40,7 +40,7 @@ from tempora.metrics import (
     time_warp_invariance_score,
 )
 from tempora.models import ContractiveCTRNN
-from tempora.training import train_circle_next_step
+from tempora.training import save_contractive_ctrnn_checkpoint, train_circle_next_step
 from tempora.viz import plot_persistence_diagram
 
 
@@ -249,12 +249,12 @@ def run_dataset_benchmark(
         cast(float, training.metrics["contraction_margin_final"])
     )
     checkpoint_path = checkpoints_dir / f"{dataset_name}_model.pt"
-    save_model_checkpoint(
+    save_contractive_ctrnn_checkpoint(
         model,
         checkpoint_path,
         dataset_name=dataset_name,
         seed=seed,
-        config=config,
+        config=config.to_jsonable(),
         training_metrics=training.metrics,
     )
     result: dict[str, Any] = {
@@ -302,38 +302,6 @@ def write_benchmark_config(config: SyntheticBenchmarkConfig, path: Path) -> None
     path.write_text(
         yaml.safe_dump(config.to_jsonable(), sort_keys=True),
         encoding="utf-8",
-    )
-
-
-def save_model_checkpoint(
-    model: ContractiveCTRNN,
-    path: Path,
-    *,
-    dataset_name: DatasetName,
-    seed: int,
-    config: SyntheticBenchmarkConfig,
-    training_metrics: dict[str, object],
-) -> None:
-    """Save a reconstructable smoke-model checkpoint for one dataset run."""
-
-    path.parent.mkdir(parents=True, exist_ok=True)
-    torch.save(
-        {
-            "model_class": "ContractiveCTRNN",
-            "model_kwargs": {
-                "input_dim": model.input_dim,
-                "latent_dim": model.latent_dim,
-                "margin": model.margin,
-                "lipschitz": model.lipschitz,
-                "use_torchdiffeq": model.use_torchdiffeq,
-            },
-            "dataset": dataset_name,
-            "seed": seed,
-            "config": config.to_jsonable(),
-            "training_metrics": training_metrics,
-            "state_dict": model.state_dict(),
-        },
-        path,
     )
 
 

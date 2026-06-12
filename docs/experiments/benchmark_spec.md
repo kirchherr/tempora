@@ -61,6 +61,8 @@ H1 persistence diagrams for the input and latent point clouds.
 `checkpoints/` contains one `*_model.pt` file per dataset in the run. Each
 checkpoint stores the `ContractiveCTRNN` state dict, reconstructable model
 kwargs, the resolved config, seed, dataset name, and training metrics.
+Use `tempora.training.load_contractive_ctrnn_checkpoint` to load a checkpoint
+and reconstruct the model with its metadata.
 
 ## Expected Failure Modes
 
