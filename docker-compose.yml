@@ -1,0 +1,12 @@
+services:
+  tempora:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: tempora:dev
+    working_dir: /workspace
+    user: "${TEMPORA_UID:-1000}:${TEMPORA_GID:-1000}"
+    volumes:
+      - .:/workspace
+    environment:
+      PYTHONPATH: /workspace/src
