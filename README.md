@@ -108,6 +108,8 @@ See [docs/experiments/baseline_comparison_protocol.md](docs/experiments/baseline
 for the baseline comparison smoke protocol introduced in Phase 6.
 See [docs/experiments/benchmark_spec.md](docs/experiments/benchmark_spec.md)
 for the synthetic smoke benchmark introduced in Phase 7.
+See [docs/theory/assumptions.md](docs/theory/assumptions.md) for the theory
+assumptions and theorem documents introduced through Phase 8.
 
 ## Non-Goals for v0.1
 
