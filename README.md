@@ -92,6 +92,8 @@ Lyapunov estimates, invariance tests, and baselines.
 
 See [docs/research_stack.md](docs/research_stack.md) for the working roles,
 mathematical toolkit, and Python dependency rationale.
+See [docs/experiments/synthetic_protocol.md](docs/experiments/synthetic_protocol.md)
+for the synthetic data API introduced in Phase 1.
 
 ## Non-Goals for v0.1
 
