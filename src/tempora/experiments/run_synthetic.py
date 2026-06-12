@@ -334,6 +334,9 @@ def render_benchmark_report(metrics: dict[str, Any]) -> str:
         "## Evidence",
         "",
     ]
+    lines.extend(_render_run_metadata(metrics))
+    lines.extend(_render_artifacts(metrics))
+    lines.extend(_render_dependency_table(metrics))
     datasets = cast(dict[str, Any], metrics["datasets"])
     for dataset_name, dataset_metrics in datasets.items():
         lines.extend(
@@ -351,6 +354,14 @@ def render_benchmark_report(metrics: dict[str, Any]) -> str:
                 "",
             ]
         )
+        dataset_figures = cast(dict[str, Any], dataset_metrics.get("figures", {}))
+        if dataset_figures:
+            lines.append("Figures:")
+            for figure_name, figure_path in sorted(dataset_figures.items()):
+                lines.append(f"- {figure_name}: `{figure_path}`")
+            lines.append("")
+        if checkpoint_path := dataset_metrics.get("checkpoint"):
+            lines.extend(["Checkpoint:", f"- `{checkpoint_path}`", ""])
         baselines = cast(dict[str, Any], dataset_metrics["baselines"])
         lines.append("| Model | prediction_mse | reconstruction_mse | fit_epochs |")
         lines.append("|---|---:|---:|---:|")
@@ -380,6 +391,67 @@ def render_benchmark_report(metrics: dict[str, Any]) -> str:
         ]
     )
     return "\n".join(lines)
+
+
+def _render_run_metadata(metrics: dict[str, Any]) -> list[str]:
+    runtime = cast(dict[str, Any], metrics.get("runtime", {}))
+    elapsed = runtime.get("elapsed_seconds")
+    elapsed_text = f"{elapsed:.3f}" if isinstance(elapsed, int | float) else "unknown"
+    git_commit = metrics.get("git_commit") or "unavailable"
+    return [
+        "## Run Metadata",
+        "",
+        f"- seed: `{metrics.get('seed', 'unknown')}`",
+        f"- git_commit: `{git_commit}`",
+        f"- python: `{runtime.get('python', 'unknown')}`",
+        f"- platform: `{runtime.get('platform', 'unknown')}`",
+        f"- elapsed_seconds: `{elapsed_text}`",
+        "",
+    ]
+
+
+def _render_artifacts(metrics: dict[str, Any]) -> list[str]:
+    artifacts = cast(dict[str, Any], metrics.get("artifacts", {}))
+    if not artifacts:
+        return [
+            "## Artifacts",
+            "",
+            "- Artifact paths were not recorded in this metrics payload.",
+            "",
+        ]
+    lines = ["## Artifacts", ""]
+    for name in ("config", "metrics", "report"):
+        if artifact_path := artifacts.get(name):
+            lines.append(f"- {name}: `{artifact_path}`")
+    checkpoints = artifacts.get("checkpoints", [])
+    if isinstance(checkpoints, list) and checkpoints:
+        lines.append("- checkpoints:")
+        for checkpoint_path in checkpoints:
+            lines.append(f"  - `{checkpoint_path}`")
+    lines.append("")
+    return lines
+
+
+def _render_dependency_table(metrics: dict[str, Any]) -> list[str]:
+    dependencies = cast(dict[str, Any], metrics.get("dependency_versions", {}))
+    if not dependencies:
+        return [
+            "## Dependency Versions",
+            "",
+            "- Dependency versions were not recorded in this metrics payload.",
+            "",
+        ]
+    lines = [
+        "## Dependency Versions",
+        "",
+        "| Package | Version |",
+        "|---|---|",
+    ]
+    for package, package_version in sorted(dependencies.items()):
+        version_text = package_version if package_version is not None else "unavailable"
+        lines.append(f"| {package} | `{version_text}` |")
+    lines.append("")
+    return lines
 
 
 def save_point_figure(points: FloatArray, path: Path, *, title: str) -> None:
@@ -428,8 +500,9 @@ def save_persistence_figure(points: FloatArray, path: Path, *, title: str) -> No
 def current_git_commit() -> str | None:
     """Return current git commit hash if available."""
 
+    safe_directory = str(Path.cwd().resolve())
     completed = subprocess.run(
-        ["git", "rev-parse", "HEAD"],
+        ["git", "-c", f"safe.directory={safe_directory}", "rev-parse", "HEAD"],
         check=False,
         capture_output=True,
         text=True,

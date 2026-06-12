@@ -20,6 +20,8 @@ All notable changes to TEMPORA will be documented in this file.
 - Added benchmark persistence-diagram figures for input and latent point clouds.
 - Added reproducible benchmark artifact snapshots for resolved configs and
   dataset-level model checkpoints.
+- Added benchmark report sections for run metadata, artifact paths, and
+  dependency versions.
 - Added reusable checkpoint save/load helpers for contractive CTRNN artifacts.
 - Added conservative theory documentation for contraction, projected learning
   stability, and persistence-diagram comparison.

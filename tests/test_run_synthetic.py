@@ -1,10 +1,15 @@
 import json
 from pathlib import Path
+from subprocess import CompletedProcess
+from typing import Any
 
 import yaml
 
 from tempora.experiments import load_benchmark_config, run_synthetic_benchmark
-from tempora.experiments.run_synthetic import render_benchmark_report
+from tempora.experiments.run_synthetic import (
+    current_git_commit,
+    render_benchmark_report,
+)
 from tempora.training import load_contractive_ctrnn_checkpoint
 
 
@@ -67,12 +72,30 @@ def test_synthetic_smoke_benchmark_writes_metrics_figures_and_report(
         assert checkpoint.metadata["config"]["run_id"] == "ci_smoke"
         assert checkpoint.model.input_dim == checkpoint.model.latent_dim
     assert "## Claims" in result.report_path.read_text(encoding="utf-8")
+    report_text = result.report_path.read_text(encoding="utf-8")
+    assert "## Run Metadata" in report_text
+    assert "## Artifacts" in report_text
+    assert "## Dependency Versions" in report_text
 
 
 def test_render_benchmark_report_separates_claims_evidence_and_open_points() -> None:
     metrics = {
         "run_id": "example",
+        "seed": 11,
         "config": {"epochs": 1},
+        "artifacts": {
+            "config": "outputs/example/config.yaml",
+            "metrics": "outputs/example/metrics.json",
+            "report": "outputs/example/report.md",
+            "checkpoints": ["outputs/example/checkpoints/circle_model.pt"],
+        },
+        "dependency_versions": {"numpy": "1.0.0", "torch": "2.0.0"},
+        "git_commit": "abc123",
+        "runtime": {
+            "python": "3.11.0",
+            "platform": "test-platform",
+            "elapsed_seconds": 1.25,
+        },
         "datasets": {
             "circle": {
                 "prediction_mse": 0.1,
@@ -88,6 +111,11 @@ def test_render_benchmark_report_separates_claims_evidence_and_open_points() -> 
                         "fit_epochs": 1.0,
                     }
                 },
+                "figures": {
+                    "input_trajectory": "outputs/example/figures/circle.png",
+                    "persistence_input": "outputs/example/figures/circle_h1.png",
+                },
+                "checkpoint": "outputs/example/checkpoints/circle_model.pt",
             }
         },
     }
@@ -96,5 +124,34 @@ def test_render_benchmark_report_separates_claims_evidence_and_open_points() -> 
 
     assert "## Claims" in report
     assert "## Evidence" in report
+    assert "## Run Metadata" in report
+    assert "## Artifacts" in report
+    assert "## Dependency Versions" in report
     assert "## Open Points" in report
+    assert "git_commit: `abc123`" in report
+    assert "outputs/example/config.yaml" in report
+    assert "| torch | `2.0.0` |" in report
+    assert "persistence_input" in report
+    assert "outputs/example/checkpoints/circle_model.pt" in report
     assert "TEMPORA Contractive CTRNN" in report
+
+
+def test_current_git_commit_marks_workspace_safe(monkeypatch: Any) -> None:
+    commands: list[list[str]] = []
+
+    def fake_run(
+        command: list[str],
+        *,
+        check: bool,
+        capture_output: bool,
+        text: bool,
+    ) -> CompletedProcess[str]:
+        commands.append(command)
+        return CompletedProcess(command, 0, stdout="abc123\n", stderr="")
+
+    monkeypatch.setattr("tempora.experiments.run_synthetic.subprocess.run", fake_run)
+
+    assert current_git_commit() == "abc123"
+    assert commands
+    assert commands[0][1] == "-c"
+    assert commands[0][2].startswith("safe.directory=")

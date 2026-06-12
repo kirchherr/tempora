@@ -74,5 +74,6 @@ and reconstruct the model with its metadata.
 ## Reproducibility Notes
 
 `metrics.json` stores the seed, resolved config, artifact paths, git commit hash
-when available, dependency versions, and runtime metadata. Generated outputs are
-ignored by git.
+when available, dependency versions, and runtime metadata. The generated
+Markdown report repeats these reproducibility fields for review. Generated
+outputs are ignored by git.
