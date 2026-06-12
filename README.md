@@ -28,8 +28,9 @@ This repository is initialized for Phase 0 of the master plan:
 - projected Oja-style plasticity and a small Circle smoke trainer
 - persistent homology metrics for finite point-cloud comparisons
 - stability and invariance diagnostics for synthetic trajectories
+- GRU, unconstrained Neural ODE, and reservoir baselines
 
-Baselines and benchmarks are intentionally not implemented yet.
+Full benchmark reports are intentionally not implemented yet.
 
 ## Local Setup
 
@@ -102,6 +103,8 @@ See [docs/experiments/plasticity_smoke_protocol.md](docs/experiments/plasticity_
 for the projected-plasticity smoke protocol introduced in Phase 3.
 See [docs/experiments/stability_invariance_protocol.md](docs/experiments/stability_invariance_protocol.md)
 for the stability and invariance diagnostics introduced in Phase 5.
+See [docs/experiments/baseline_comparison_protocol.md](docs/experiments/baseline_comparison_protocol.md)
+for the baseline comparison smoke protocol introduced in Phase 6.
 
 ## Non-Goals for v0.1
 
