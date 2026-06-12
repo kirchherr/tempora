@@ -23,6 +23,7 @@ All notable changes to TEMPORA will be documented in this file.
 - Added benchmark report sections for run metadata, artifact paths, and
   dependency versions.
 - Added a CI smoke-benchmark gate with read-only workflow permissions.
+- Added automated local Markdown link checks for README and docs.
 - Added reusable checkpoint save/load helpers for contractive CTRNN artifacts.
 - Added conservative theory documentation for contraction, projected learning
   stability, and persistence-diagram comparison.

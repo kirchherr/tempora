@@ -47,6 +47,12 @@ def test_outputs_are_ignored_except_gitkeep() -> None:
     assert "!outputs/.gitkeep" in text
 
 
+def test_release_checklist_mentions_doc_link_verification() -> None:
+    text = (ROOT / "docs/release_v0_1.md").read_text(encoding="utf-8")
+
+    assert "Confirm docs and README links resolve" in text
+
+
 def test_release_docs_do_not_embed_benchmark_results() -> None:
     checked_paths = (
         ROOT / "CHANGELOG.md",
