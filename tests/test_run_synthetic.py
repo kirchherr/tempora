@@ -57,6 +57,11 @@ def test_synthetic_smoke_benchmark_writes_metrics_figures_and_report(
     for dataset_name, dataset_metrics in payload["datasets"].items():
         assert dataset_metrics["prediction_mse"] >= 0.0
         assert dataset_metrics["contraction_margin_final"] > 0.0
+        certificate = dataset_metrics["certificates"]["contraction"]
+        assert certificate["theorem"] == "theorem_01_sufficient_contraction"
+        assert certificate["is_certified"] is True
+        assert certificate["contraction_margin"] > certificate["required_margin"]
+        assert certificate["assumptions"]
         assert "gru" in dataset_metrics["baselines"]
         assert "vanilla_neural_ode" in dataset_metrics["baselines"]
         assert Path(dataset_metrics["figures"]["input_trajectory"]).exists()
@@ -76,6 +81,8 @@ def test_synthetic_smoke_benchmark_writes_metrics_figures_and_report(
     assert "## Run Metadata" in report_text
     assert "## Artifacts" in report_text
     assert "## Dependency Versions" in report_text
+    assert "Certificates:" in report_text
+    assert "`certified=True`" in report_text
 
 
 def test_render_benchmark_report_separates_claims_evidence_and_open_points() -> None:
@@ -116,6 +123,19 @@ def test_render_benchmark_report_separates_claims_evidence_and_open_points() -> 
                     "persistence_input": "outputs/example/figures/circle_h1.png",
                 },
                 "checkpoint": "outputs/example/checkpoints/circle_model.pt",
+                "certificates": {
+                    "contraction": {
+                        "theorem": "theorem_01_sufficient_contraction",
+                        "damping_min": 1.0,
+                        "recurrent_spectral_norm": 0.4,
+                        "lipschitz": 1.0,
+                        "contraction_margin": 0.6,
+                        "required_margin": 0.05,
+                        "is_certified": True,
+                        "assumptions": ["bounded tanh nonlinearity"],
+                        "limitation": "Sufficient contraction certificate only.",
+                    }
+                },
             }
         },
     }
@@ -133,6 +153,9 @@ def test_render_benchmark_report_separates_claims_evidence_and_open_points() -> 
     assert "| torch | `2.0.0` |" in report
     assert "persistence_input" in report
     assert "outputs/example/checkpoints/circle_model.pt" in report
+    assert "Certificates:" in report
+    assert "`certified=True`" in report
+    assert "required=`0.05`" in report
     assert "TEMPORA Contractive CTRNN" in report
 
 

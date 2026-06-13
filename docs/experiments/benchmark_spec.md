@@ -32,6 +32,7 @@ and model examples live in the other `configs/*.yaml` files.
 - prediction MSE,
 - reconstruction MSE,
 - contraction margin,
+- sufficient-contraction certificate payload,
 - largest Lyapunov estimate,
 - H0/H1 persistence bottleneck distances,
 - time-warp invariance score,
@@ -66,6 +67,12 @@ kwargs, the resolved config, seed, dataset name, and training metrics.
 Use `tempora.training.load_contractive_ctrnn_checkpoint` to load a checkpoint
 and reconstruct the model with its metadata.
 
+`metrics.json` also stores a per-dataset sufficient-contraction certificate
+under `datasets.<name>.certificates.contraction`. The certificate is
+machine-readable and records the theorem identifier, assumptions, limitation,
+computed contraction margin, required margin, and certification result. The
+Markdown report repeats a compact certificate summary for review.
+
 ## Expected Failure Modes
 
 - non-finite metrics,
@@ -76,6 +83,6 @@ and reconstruct the model with its metadata.
 ## Reproducibility Notes
 
 `metrics.json` stores the seed, resolved config, artifact paths, git commit hash
-when available, dependency versions, and runtime metadata. The generated
-Markdown report repeats these reproducibility fields for review. Generated
-outputs are ignored by git.
+when available, dependency versions, runtime metadata, and proof certificate
+payloads. The generated Markdown report repeats these reproducibility fields for
+review. Generated outputs are ignored by git.

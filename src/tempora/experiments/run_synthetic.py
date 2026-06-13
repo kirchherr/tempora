@@ -40,6 +40,7 @@ from tempora.metrics import (
     time_warp_invariance_score,
 )
 from tempora.models import ContractiveCTRNN
+from tempora.proof import certify_model_contraction
 from tempora.training import save_contractive_ctrnn_checkpoint, train_circle_next_step
 from tempora.viz import plot_persistence_diagram
 
@@ -257,6 +258,7 @@ def run_dataset_benchmark(
         config=config.to_jsonable(),
         training_metrics=training.metrics,
     )
+    contraction_certificate = certify_model_contraction(model)
     result: dict[str, Any] = {
         "dataset": dataset_name,
         "seed": seed,
@@ -283,6 +285,9 @@ def run_dataset_benchmark(
         "training": training.metrics,
         "topology": topology,
         "lyapunov": lyapunov.to_metrics(),
+        "certificates": {
+            "contraction": contraction_certificate.to_jsonable(),
+        },
         "baselines": baseline_report["models"],
         "figures": {
             "input_trajectory": str(input_figure),
@@ -362,6 +367,28 @@ def render_benchmark_report(metrics: dict[str, Any]) -> str:
             lines.append("")
         if checkpoint_path := dataset_metrics.get("checkpoint"):
             lines.extend(["Checkpoint:", f"- `{checkpoint_path}`", ""])
+        dataset_certificates = cast(
+            dict[str, Any],
+            dataset_metrics.get("certificates", {}),
+        )
+        if dataset_certificates:
+            lines.append("Certificates:")
+            contraction_certificate = cast(
+                dict[str, Any],
+                dataset_certificates.get("contraction", {}),
+            )
+            if contraction_certificate:
+                lines.extend(
+                    [
+                        "- contraction: "
+                        f"`certified={contraction_certificate['is_certified']}`, "
+                        "margin="
+                        f"`{contraction_certificate['contraction_margin']:.6g}`, "
+                        "required="
+                        f"`{contraction_certificate['required_margin']:.6g}`",
+                    ]
+                )
+            lines.append("")
         baselines = cast(dict[str, Any], dataset_metrics["baselines"])
         lines.append("| Model | prediction_mse | reconstruction_mse | fit_epochs |")
         lines.append("|---|---:|---:|---:|")

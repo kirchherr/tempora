@@ -28,6 +28,7 @@ All notable changes to TEMPORA will be documented in this file.
 - Added machine-readable sufficient-contraction proof certificates.
 - Added machine-readable projected-learning stability certificates.
 - Added machine-readable empirical topology comparison certificates.
+- Added benchmark contraction certificates in metrics and reports.
 - Added reusable checkpoint save/load helpers for contractive CTRNN artifacts.
 - Added conservative theory documentation for contraction, projected learning
   stability, and persistence-diagram comparison.
