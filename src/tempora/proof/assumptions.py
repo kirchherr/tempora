@@ -19,3 +19,13 @@ LEARNING_STABILITY_ASSUMPTIONS: tuple[str, ...] = (
     "The certificate concerns only stored post-projection recurrent weights.",
     "No stability claim is made about the unprojected update path.",
 )
+
+TOPOLOGY_COMPARISON_ASSUMPTIONS: tuple[str, ...] = (
+    "Input and latent point clouds are finite arrays.",
+    "All point-cloud values are finite.",
+    "Persistence diagrams are computed by the configured TDA backend.",
+    "Diagram distances are computed for an explicit homology degree.",
+    "Certification uses an explicit maximum empirical diagram distance.",
+    "The certificate is an empirical finite-sample comparison only.",
+    "No semantic equivalence or homeomorphism claim is made.",
+)

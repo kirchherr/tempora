@@ -30,6 +30,8 @@ distances then provide empirical distances between these summaries.
   `persim`.
 - `evaluate_topology_pair` reports H0/H1 distances and dominant finite
   lifetimes for input and latent point clouds.
+- `src/tempora/proof/certificates.py` exposes JSON-serializable empirical TDA
+  comparison certificates for explicit distance thresholds.
 
 ## Empirical Checks
 
@@ -51,4 +53,4 @@ choice, and numerical tolerance.
 ## Related Tests
 
 - `tests/test_tda_metrics.py`
-
+- `tests/test_topology_certificates.py`

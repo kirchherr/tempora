@@ -12,6 +12,7 @@ from tempora.models.projections import contraction_margin, spectral_norm
 from tempora.proof.assumptions import (
     CONTRACTION_ASSUMPTIONS,
     LEARNING_STABILITY_ASSUMPTIONS,
+    TOPOLOGY_COMPARISON_ASSUMPTIONS,
 )
 
 
@@ -73,6 +74,31 @@ class LearningStabilityCertificate:
         return payload
 
 
+@dataclass(frozen=True)
+class TopologyComparisonCertificate:
+    """JSON-serializable certificate for finite TDA metric comparisons."""
+
+    theorem: str
+    metric: str
+    homology_dim: int
+    distance: float
+    max_distance: float
+    input_n_points: int
+    latent_n_points: int
+    input_dominant_lifetime: float
+    latent_dominant_lifetime: float
+    is_certified: bool
+    assumptions: tuple[str, ...]
+    limitation: str
+
+    def to_jsonable(self) -> dict[str, Any]:
+        """Return a JSON-serializable representation of the certificate."""
+
+        payload = asdict(self)
+        payload["assumptions"] = list(self.assumptions)
+        return payload
+
+
 def certify_model_contraction(
     model: SupportsContractionCertificate,
     *,
@@ -86,6 +112,43 @@ def certify_model_contraction(
         recurrent_weights=model.recurrent_weight,
         lipschitz=model.lipschitz,
         required_margin=resolved_margin,
+    )
+
+
+def certify_topology_comparison(
+    metrics: dict[str, Any],
+    *,
+    homology_dim: int = 1,
+    max_distance: float,
+) -> TopologyComparisonCertificate:
+    """Certify an empirical persistence-diagram distance against a threshold."""
+
+    if homology_dim < 0:
+        raise ValueError("homology_dim must be non-negative.")
+    if max_distance < 0.0:
+        raise ValueError("max_distance must be non-negative.")
+
+    metric = str(metrics.get("metric", "bottleneck"))
+    distance_key = f"{metric}_h{homology_dim}"
+    input_lifetime_key = f"input_h{homology_dim}_dominant_lifetime"
+    latent_lifetime_key = f"latent_h{homology_dim}_dominant_lifetime"
+    distance = _required_float_metric(metrics, distance_key)
+    return TopologyComparisonCertificate(
+        theorem="theorem_03_empirical_persistence_diagram_comparison",
+        metric=metric,
+        homology_dim=homology_dim,
+        distance=distance,
+        max_distance=float(max_distance),
+        input_n_points=_required_int_metric(metrics, "input_n_points"),
+        latent_n_points=_required_int_metric(metrics, "latent_n_points"),
+        input_dominant_lifetime=_required_float_metric(metrics, input_lifetime_key),
+        latent_dominant_lifetime=_required_float_metric(metrics, latent_lifetime_key),
+        is_certified=distance <= float(max_distance),
+        assumptions=TOPOLOGY_COMPARISON_ASSUMPTIONS,
+        limitation=(
+            "Empirical finite point-cloud comparison only; does not prove "
+            "semantic equivalence, homeomorphism, or real-world robustness."
+        ),
     )
 
 
@@ -118,6 +181,20 @@ def certify_projected_update_stability(
             "the unprojected update path."
         ),
     )
+
+
+def _required_float_metric(metrics: dict[str, Any], key: str) -> float:
+    value = metrics.get(key)
+    if not isinstance(value, int | float) or isinstance(value, bool):
+        raise ValueError(f"metrics.{key} must be numeric.")
+    return float(value)
+
+
+def _required_int_metric(metrics: dict[str, Any], key: str) -> int:
+    value = metrics.get(key)
+    if not isinstance(value, int) or isinstance(value, bool):
+        raise ValueError(f"metrics.{key} must be an integer.")
+    return value
 
 
 def certify_sufficient_contraction(

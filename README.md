@@ -25,7 +25,7 @@ This repository currently contains the `0.1.0-alpha` release-prep scope:
 - project guidance for research roles and required mathematical tooling
 - synthetic trajectory generators and perturbations
 - contractive CTRNN model core with projection and Jacobian diagnostics
-- machine-readable sufficient-contraction and projected-learning certificates
+- machine-readable contraction, projected-learning, and topology certificates
 - projected Oja-style plasticity and a small Circle smoke trainer
 - persistent homology metrics for finite point-cloud comparisons
 - stability and invariance diagnostics for synthetic trajectories
