@@ -9,7 +9,7 @@ import torch
 
 from tempora.data import TemporalDataset
 from tempora.models import ContractiveCTRNN
-from tempora.models.plasticity import apply_projected_oja_update_
+from tempora.models.plasticity import PlasticityLog, apply_projected_oja_update_
 from tempora.training.callbacks import TrainingRecord, records_to_metrics
 from tempora.training.losses import next_step_prediction_loss
 
@@ -20,6 +20,7 @@ class TrainingResult:
 
     records: list[TrainingRecord]
     metrics: dict[str, object]
+    last_plasticity_log: PlasticityLog | None = None
 
 
 def train_circle_next_step(
@@ -67,6 +68,7 @@ def train_circle_next_step(
     model.project_recurrent_weight_()
 
     records: list[TrainingRecord] = []
+    last_plasticity_log: PlasticityLog | None = None
     for epoch in range(epochs):
         optimizer.zero_grad()
         states = model(observations, times=times, initial_state=initial_state)
@@ -84,6 +86,7 @@ def train_circle_next_step(
                 stabilization=plasticity_stabilization,
                 homeostatic_decay=homeostatic_decay,
             )
+            last_plasticity_log = plasticity_log
             plasticity_margin_after = plasticity_log.margin_after
             margin = model.sufficient_contraction_margin()
 
@@ -100,6 +103,13 @@ def train_circle_next_step(
         )
 
     metrics = records_to_metrics(records)
+    metrics["plasticity_last_update"] = (
+        last_plasticity_log.to_metrics() if last_plasticity_log is not None else None
+    )
     if not np.isfinite([record.loss for record in records]).all():
         raise RuntimeError("non-finite training loss encountered.")
-    return TrainingResult(records=records, metrics=metrics)
+    return TrainingResult(
+        records=records,
+        metrics=metrics,
+        last_plasticity_log=last_plasticity_log,
+    )

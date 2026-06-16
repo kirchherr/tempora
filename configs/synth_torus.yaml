@@ -1,0 +1,11 @@
+dataset: torus
+seed: 102
+n_steps: 256
+duration: 6.283185307179586
+major_radius: 2.0
+minor_radius: 0.5
+major_angular_velocity: 1.0
+minor_angular_velocity: 3.0
+phase_major: 0.0
+phase_minor: 0.0
+noise_std: 0.0

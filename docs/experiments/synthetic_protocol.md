@@ -21,6 +21,10 @@ All generators return `TemporalDataset` with:
 - `clean_states`: shape `(n_steps, state_dim)`
 - `metadata`: generator parameters and shape metadata
 
+Example generator configs are available in `configs/synth_circle.yaml`,
+`configs/synth_torus.yaml`, `configs/synth_lorenz.yaml`, and
+`configs/synth_rossler.yaml`.
+
 ## Perturbations
 
 - `time_warp` changes the time grid while preserving sampled trajectory values.
@@ -47,4 +51,3 @@ All generators return `TemporalDataset` with:
 The same generator parameters and seed must produce the same arrays. The
 synthetic data tests are deliberately small enough for CI and do not constitute
 benchmark evidence.
-

@@ -17,6 +17,8 @@ The default config runs on:
 - Rossler
 
 The smoke defaults are intentionally small and CI-friendly.
+The default smoke config is `configs/benchmark_smoke.yaml`; standalone dataset
+and model examples live in the other `configs/*.yaml` files.
 
 ## Models
 
@@ -30,6 +32,7 @@ The smoke defaults are intentionally small and CI-friendly.
 - prediction MSE,
 - reconstruction MSE,
 - contraction margin,
+- sufficient-contraction and projected-learning stability certificate payloads,
 - largest Lyapunov estimate,
 - H0/H1 persistence bottleneck distances,
 - time-warp invariance score,
@@ -48,10 +51,30 @@ The command writes:
 
 ```text
 outputs/<run_id>/
+  config.yaml
   metrics.json
   report.md
   figures/
+  checkpoints/
 ```
+
+For each dataset, `figures/` contains input and latent trajectory plots plus
+H1 persistence diagrams for the input and latent point clouds.
+
+`checkpoints/` contains one `*_model.pt` file per dataset in the run. Each
+checkpoint stores the `ContractiveCTRNN` state dict, reconstructable model
+kwargs, the resolved config, seed, dataset name, and training metrics.
+Use `tempora.training.load_contractive_ctrnn_checkpoint` to load a checkpoint
+and reconstruct the model with its metadata.
+
+`metrics.json` also stores per-dataset proof-adjacent certificates under
+`datasets.<name>.certificates`. The `contraction` certificate records the
+theorem identifier, assumptions, limitation, computed contraction margin,
+required margin, and certification result. When projected plasticity is enabled,
+`learning_stability` records the last projected Oja update, including the
+pre-update margin, post-projection margin, update norm, required margin, and
+certification result. The Markdown report repeats compact certificate summaries
+for review.
 
 ## Expected Failure Modes
 
@@ -62,6 +85,7 @@ outputs/<run_id>/
 
 ## Reproducibility Notes
 
-`metrics.json` stores the seed, config, git commit hash when available,
-dependency versions, and runtime metadata. Generated outputs are ignored by git.
-
+`metrics.json` stores the seed, resolved config, artifact paths, git commit hash
+when available, dependency versions, runtime metadata, and proof certificate
+payloads. The generated Markdown report repeats these reproducibility fields for
+review. Generated outputs are ignored by git.

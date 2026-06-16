@@ -1,0 +1,12 @@
+dataset: rossler
+seed: 104
+n_steps: 512
+duration: 40.0
+a: 0.2
+b: 0.2
+c: 5.7
+initial_state:
+  - 1.0
+  - 0.0
+  - 0.0
+noise_std: 0.0

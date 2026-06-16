@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "If you use TEMPORA, please cite the project repository and release you used."
+title: "TEMPORA: Temporale Emergenz und mathematische Beweisbarkeit selbstorganisierender neuronaler Systeme"
+version: "0.1.0-alpha"
+authors:
+  - name: "TEMPORA Contributors"
+repository-code: "https://github.com/kirchherr/tempora"
+abstract: "TEMPORA is a reproducible Python research codebase for proof-guided temporal self-organization in continuous-time neural systems."
+keywords:
+  - continuous-time neural systems
+  - contraction
+  - persistent homology
+  - synthetic dynamics
+  - neural ordinary differential equations
+

@@ -15,7 +15,7 @@ capability.
 
 ## Repository Status
 
-This repository is initialized for Phase 0 of the master plan:
+This repository currently contains the `0.1.0-alpha` release-prep scope:
 
 - Python package with `src/` layout
 - pytest, ruff, and mypy configuration
@@ -25,13 +25,14 @@ This repository is initialized for Phase 0 of the master plan:
 - project guidance for research roles and required mathematical tooling
 - synthetic trajectory generators and perturbations
 - contractive CTRNN model core with projection and Jacobian diagnostics
+- machine-readable contraction, projected-learning, and topology certificates
 - projected Oja-style plasticity and a small Circle smoke trainer
 - persistent homology metrics for finite point-cloud comparisons
 - stability and invariance diagnostics for synthetic trajectories
 - GRU, unconstrained Neural ODE, and reservoir baselines
 - CI-small synthetic smoke benchmark with metrics, figures, and report
 
-Release packaging is intentionally not implemented yet.
+Final release tagging and license selection are intentionally pending.
 
 ## Local Setup
 
@@ -48,6 +49,33 @@ On Linux or macOS, activate the virtual environment with:
 ```bash
 source .venv/bin/activate
 ```
+
+## Quickstart
+
+Run the full check suite in Docker:
+
+```bash
+docker compose run --rm tempora
+```
+
+Run the CI-small synthetic smoke benchmark:
+
+```bash
+docker compose run --rm tempora python scripts/train_synth.py --config configs/benchmark_smoke.yaml
+```
+
+Example dataset and model configs live under `configs/`, including
+`synth_circle.yaml`, `synth_torus.yaml`, `synth_lorenz.yaml`,
+`synth_rossler.yaml`, and `contractive_ctrnn.yaml`.
+
+Regenerate a Markdown report from saved metrics:
+
+```bash
+docker compose run --rm tempora python scripts/make_report.py outputs/benchmark_smoke/metrics.json
+```
+
+Generated metrics, reports, config snapshots, checkpoints, trajectory figures,
+and persistence figures are written under `outputs/` and are not committed.
 
 ## Docker Setup
 
@@ -92,9 +120,9 @@ with a sufficient contraction condition:
 min(D) > L_sigma * ||W||_2 + margin
 ```
 
-Future phases will implement synthetic data generators, a contractive CTRNN,
+The current alpha implements synthetic data generators, a contractive CTRNN,
 projection operators, Oja-style plasticity, persistent homology metrics,
-Lyapunov estimates, invariance tests, and baselines.
+Lyapunov estimates, invariance tests, baselines, and a smoke benchmark.
 
 See [docs/research_stack.md](docs/research_stack.md) for the working roles,
 mathematical toolkit, and Python dependency rationale.
@@ -110,6 +138,7 @@ See [docs/experiments/benchmark_spec.md](docs/experiments/benchmark_spec.md)
 for the synthetic smoke benchmark introduced in Phase 7.
 See [docs/theory/assumptions.md](docs/theory/assumptions.md) for the theory
 assumptions and theorem documents introduced through Phase 8.
+See [docs/release_v0_1.md](docs/release_v0_1.md) for the v0.1 release checklist.
 
 ## Non-Goals for v0.1
 
@@ -119,3 +148,8 @@ assumptions and theorem documents introduced through Phase 8.
 - No distributed training.
 - No broad semantic-preservation proof.
 - No invented benchmark results.
+
+## Release Status
+
+TEMPORA is currently `0.1.0-alpha` release-prep software. The license is pending
+project-owner selection; see [LICENSE.md](LICENSE.md).

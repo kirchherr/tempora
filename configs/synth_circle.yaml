@@ -1,0 +1,8 @@
+dataset: circle
+seed: 101
+n_steps: 256
+duration: 6.283185307179586
+radius: 1.0
+angular_velocity: 1.0
+phase: 0.0
+noise_std: 0.0

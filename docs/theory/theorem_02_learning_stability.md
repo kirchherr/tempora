@@ -56,6 +56,8 @@ comes from enforcing the projection after the update.
   optimizer steps and applies projected Oja-style updates in the smoke loop.
 - `src/tempora/training/callbacks.py` records JSON-serializable margins and
   losses.
+- `src/tempora/proof/certificates.py` exposes JSON-serializable projected-update
+  stability certificates based on post-projection margins.
 
 ## Empirical Checks
 
@@ -80,4 +82,4 @@ assumptions.
 - `tests/test_plasticity.py`
 - `tests/test_end_to_end_synth.py`
 - `tests/test_run_synthetic.py`
-
+- `tests/test_learning_stability_certificates.py`

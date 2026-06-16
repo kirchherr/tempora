@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tempora"
-version = "0.0.0"
+version = "0.1.0a0"
 description = "Proof-guided temporal self-organization in continuous-time neural systems."
 readme = "README.md"
 requires-python = ">=3.11"
