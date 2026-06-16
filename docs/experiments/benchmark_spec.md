@@ -80,6 +80,12 @@ threshold is a review policy for finite smoke artifacts, not a proof of semantic
 equivalence. The Markdown report repeats compact certificate summaries for
 review.
 
+At the run level, `metrics.json` stores `certificate_summary` with per
+certificate-type counts and an explicit list of failed certificates. This
+summary is repeated in the Markdown report before the dataset sections so a
+reviewer can see immediately which proof-adjacent checks passed and which need
+attention.
+
 ## Expected Failure Modes
 
 - non-finite metrics,
@@ -91,6 +97,6 @@ review.
 
 `metrics.json` stores the seed, resolved config, artifact paths, git commit hash
 when available, dependency versions, runtime metadata, proof certificate
-payloads, and the topology certificate threshold from the resolved config. The
-generated Markdown report repeats these reproducibility fields for review.
-Generated outputs are ignored by git.
+payloads, certificate-summary counts, and the topology certificate threshold
+from the resolved config. The generated Markdown report repeats these
+reproducibility fields for review. Generated outputs are ignored by git.

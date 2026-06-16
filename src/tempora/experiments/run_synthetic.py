@@ -169,6 +169,7 @@ def run_synthetic_benchmark(
             "elapsed_seconds": time.perf_counter() - started_at,
         },
         "datasets": dataset_results,
+        "certificate_summary": summarize_benchmark_certificates(dataset_results),
     }
     validate_json_metrics(metrics)
     metrics_path.write_text(
@@ -363,6 +364,7 @@ def render_benchmark_report(metrics: dict[str, Any]) -> str:
     lines.extend(_render_run_metadata(metrics))
     lines.extend(_render_artifacts(metrics))
     lines.extend(_render_dependency_table(metrics))
+    lines.extend(_render_certificate_summary(metrics))
     datasets = cast(dict[str, Any], metrics["datasets"])
     for dataset_name, dataset_metrics in datasets.items():
         lines.extend(
@@ -470,6 +472,131 @@ def render_benchmark_report(metrics: dict[str, Any]) -> str:
         ]
     )
     return "\n".join(lines)
+
+
+def summarize_benchmark_certificates(datasets: dict[str, Any]) -> dict[str, Any]:
+    """Summarize per-dataset certificate status for benchmark review artifacts."""
+
+    by_certificate: dict[str, dict[str, int]] = {}
+    failures: list[dict[str, Any]] = []
+    for dataset_name, dataset_metrics in sorted(datasets.items()):
+        certificates = cast(dict[str, Any], dataset_metrics.get("certificates", {}))
+        for certificate_name, certificate_payload in sorted(certificates.items()):
+            certificate = cast(dict[str, Any], certificate_payload)
+            summary = by_certificate.setdefault(
+                certificate_name,
+                {"total": 0, "certified": 0, "failed": 0},
+            )
+            summary["total"] += 1
+            if certificate.get("is_certified") is True:
+                summary["certified"] += 1
+            else:
+                summary["failed"] += 1
+                failures.append(
+                    _certificate_failure_summary(
+                        dataset_name,
+                        certificate_name,
+                        certificate,
+                    )
+                )
+    return {
+        "all_certified": not failures,
+        "by_certificate": by_certificate,
+        "failures": failures,
+    }
+
+
+def _certificate_failure_summary(
+    dataset_name: str,
+    certificate_name: str,
+    certificate: dict[str, Any],
+) -> dict[str, Any]:
+    payload: dict[str, Any] = {
+        "dataset": dataset_name,
+        "certificate": certificate_name,
+        "theorem": certificate.get("theorem", "unknown"),
+    }
+    if certificate_name == "topology_comparison":
+        payload.update(
+            {
+                "metric": certificate.get("metric", "unknown"),
+                "homology_dim": certificate.get("homology_dim"),
+                "distance": certificate.get("distance"),
+                "max_distance": certificate.get("max_distance"),
+            }
+        )
+    elif "required_margin" in certificate:
+        payload["margin"] = certificate.get(
+            "contraction_margin",
+            certificate.get("margin_after"),
+        )
+        payload["required_margin"] = certificate.get("required_margin")
+    return payload
+
+
+def _render_certificate_summary(metrics: dict[str, Any]) -> list[str]:
+    datasets = cast(dict[str, Any], metrics.get("datasets", {}))
+    summary = cast(
+        dict[str, Any],
+        metrics.get("certificate_summary")
+        or summarize_benchmark_certificates(datasets),
+    )
+    by_certificate = cast(dict[str, Any], summary.get("by_certificate", {}))
+    if not by_certificate:
+        return [
+            "## Certificate Summary",
+            "",
+            "- No certificate payloads were recorded.",
+            "",
+        ]
+
+    lines = [
+        "## Certificate Summary",
+        "",
+        "| Certificate | certified | failed | total |",
+        "|---|---:|---:|---:|",
+    ]
+    for certificate_name, certificate_counts in sorted(by_certificate.items()):
+        counts = cast(dict[str, int], certificate_counts)
+        lines.append(
+            f"| {certificate_name} | {counts['certified']} | "
+            f"{counts['failed']} | {counts['total']} |"
+        )
+
+    failures = cast(list[dict[str, Any]], summary.get("failures", []))
+    if failures:
+        lines.extend(["", "Certificate failures:"])
+        for failure in failures:
+            lines.append(f"- {_format_certificate_failure(failure)}")
+    lines.append("")
+    return lines
+
+
+def _format_certificate_failure(failure: dict[str, Any]) -> str:
+    dataset = failure.get("dataset", "unknown")
+    certificate = failure.get("certificate", "unknown")
+    theorem = failure.get("theorem", "unknown")
+    if "distance" in failure:
+        return (
+            f"{dataset}/{certificate}: `{theorem}`, "
+            f"distance=`{_format_report_value(failure.get('distance'))}`, "
+            f"max=`{_format_report_value(failure.get('max_distance'))}`"
+        )
+    if "margin" in failure:
+        return (
+            f"{dataset}/{certificate}: `{theorem}`, "
+            f"margin=`{_format_report_value(failure.get('margin'))}`, "
+            f"required=`{_format_report_value(failure.get('required_margin'))}`"
+        )
+    return f"{dataset}/{certificate}: `{theorem}`"
+
+
+def _format_report_value(value: Any) -> str:
+    if isinstance(value, float):
+        return f"{value:.6g}"
+    if isinstance(value, int):
+        return str(value)
+    return str(value)
 
 
 def _render_run_metadata(metrics: dict[str, Any]) -> list[str]:

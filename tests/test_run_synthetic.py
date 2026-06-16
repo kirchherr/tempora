@@ -11,6 +11,7 @@ from tempora.experiments.run_synthetic import (
     SyntheticBenchmarkConfig,
     current_git_commit,
     render_benchmark_report,
+    summarize_benchmark_certificates,
 )
 from tempora.training import load_contractive_ctrnn_checkpoint
 
@@ -58,6 +59,24 @@ def test_synthetic_smoke_benchmark_writes_metrics_figures_and_report(
         str(path) for path in result.checkpoint_paths
     }
     assert payload["dependency_versions"]["torch"] is not None
+    certificate_summary = payload["certificate_summary"]
+    assert certificate_summary["all_certified"] is True
+    assert certificate_summary["failures"] == []
+    assert certificate_summary["by_certificate"]["contraction"] == {
+        "certified": 4,
+        "failed": 0,
+        "total": 4,
+    }
+    assert certificate_summary["by_certificate"]["learning_stability"] == {
+        "certified": 4,
+        "failed": 0,
+        "total": 4,
+    }
+    assert certificate_summary["by_certificate"]["topology_comparison"] == {
+        "certified": 4,
+        "failed": 0,
+        "total": 4,
+    }
     for dataset_name, dataset_metrics in payload["datasets"].items():
         assert dataset_metrics["prediction_mse"] >= 0.0
         assert dataset_metrics["contraction_margin_final"] > 0.0
@@ -113,6 +132,8 @@ def test_synthetic_smoke_benchmark_writes_metrics_figures_and_report(
     assert "## Run Metadata" in report_text
     assert "## Artifacts" in report_text
     assert "## Dependency Versions" in report_text
+    assert "## Certificate Summary" in report_text
+    assert "| topology_comparison | 4 | 0 | 4 |" in report_text
     assert "Certificates:" in report_text
     assert "`certified=True`" in report_text
     assert "learning_stability" in report_text
@@ -209,6 +230,7 @@ def test_render_benchmark_report_separates_claims_evidence_and_open_points() -> 
     assert "## Run Metadata" in report
     assert "## Artifacts" in report
     assert "## Dependency Versions" in report
+    assert "## Certificate Summary" in report
     assert "## Open Points" in report
     assert "git_commit: `abc123`" in report
     assert "outputs/example/config.yaml" in report
@@ -223,7 +245,57 @@ def test_render_benchmark_report_separates_claims_evidence_and_open_points() -> 
     assert "topology_comparison" in report
     assert "h1 bottleneck=`0.05`" in report
     assert "max=`0.1`" in report
+    assert "| topology_comparison | 1 | 0 | 1 |" in report
     assert "TEMPORA Contractive CTRNN" in report
+
+
+def test_summarize_benchmark_certificates_records_failures() -> None:
+    datasets = {
+        "circle": {
+            "certificates": {
+                "topology_comparison": {
+                    "theorem": "theorem_03_empirical_persistence_diagram_comparison",
+                    "metric": "bottleneck",
+                    "homology_dim": 1,
+                    "distance": 1.2,
+                    "max_distance": 1.0,
+                    "is_certified": False,
+                }
+            }
+        },
+        "torus": {
+            "certificates": {
+                "topology_comparison": {
+                    "theorem": "theorem_03_empirical_persistence_diagram_comparison",
+                    "metric": "bottleneck",
+                    "homology_dim": 1,
+                    "distance": 0.7,
+                    "max_distance": 1.0,
+                    "is_certified": True,
+                }
+            }
+        },
+    }
+
+    summary = summarize_benchmark_certificates(datasets)
+
+    assert summary["all_certified"] is False
+    assert summary["by_certificate"]["topology_comparison"] == {
+        "certified": 1,
+        "failed": 1,
+        "total": 2,
+    }
+    assert summary["failures"] == [
+        {
+            "dataset": "circle",
+            "certificate": "topology_comparison",
+            "theorem": "theorem_03_empirical_persistence_diagram_comparison",
+            "metric": "bottleneck",
+            "homology_dim": 1,
+            "distance": 1.2,
+            "max_distance": 1.0,
+        }
+    ]
 
 
 def test_synthetic_benchmark_rejects_negative_topology_threshold(

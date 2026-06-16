@@ -33,6 +33,7 @@ All notable changes to TEMPORA will be documented in this file.
   plasticity update.
 - Added benchmark topology comparison certificates with a configured H1
   persistence-distance threshold.
+- Added benchmark certificate-summary counts and failure listings.
 - Added reusable checkpoint save/load helpers for contractive CTRNN artifacts.
 - Added conservative theory documentation for contraction, projected learning
   stability, and persistence-diagram comparison.
