@@ -3,10 +3,12 @@ from pathlib import Path
 from subprocess import CompletedProcess
 from typing import Any
 
+import pytest
 import yaml
 
 from tempora.experiments import load_benchmark_config, run_synthetic_benchmark
 from tempora.experiments.run_synthetic import (
+    SyntheticBenchmarkConfig,
     current_git_commit,
     render_benchmark_report,
 )
@@ -29,6 +31,7 @@ def test_synthetic_smoke_benchmark_writes_metrics_figures_and_report(
                 "learning_rate": 0.03,
                 "plasticity_learning_rate": 0.0005,
                 "baseline_epochs": 2,
+                "topology_max_distance": 10.0,
             }
         ),
         encoding="utf-8",
@@ -44,6 +47,7 @@ def test_synthetic_smoke_benchmark_writes_metrics_figures_and_report(
     resolved_config = yaml.safe_load(result.config_path.read_text(encoding="utf-8"))
     assert resolved_config["run_id"] == "ci_smoke"
     assert resolved_config["datasets"] == ["circle", "torus", "lorenz", "rossler"]
+    assert resolved_config["topology_max_distance"] == 10.0
 
     payload = json.loads(result.metrics_path.read_text(encoding="utf-8"))
     assert payload["run_id"] == "ci_smoke"
@@ -77,6 +81,19 @@ def test_synthetic_smoke_benchmark_writes_metrics_figures_and_report(
             dataset_metrics["training"]["plasticity_last_update"]["margin_after"]
             == learning_certificate["margin_after"]
         )
+        topology_certificate = dataset_metrics["certificates"]["topology_comparison"]
+        assert (
+            topology_certificate["theorem"]
+            == "theorem_03_empirical_persistence_diagram_comparison"
+        )
+        assert topology_certificate["metric"] == "bottleneck"
+        assert topology_certificate["homology_dim"] == 1
+        assert topology_certificate["distance"] == dataset_metrics["tda_bottleneck_h1"]
+        assert topology_certificate["max_distance"] == 10.0
+        assert topology_certificate["is_certified"] is True
+        assert topology_certificate["input_n_points"] == config.n_steps
+        assert topology_certificate["latent_n_points"] == config.n_steps
+        assert topology_certificate["assumptions"]
         assert "gru" in dataset_metrics["baselines"]
         assert "vanilla_neural_ode" in dataset_metrics["baselines"]
         assert Path(dataset_metrics["figures"]["input_trajectory"]).exists()
@@ -99,6 +116,7 @@ def test_synthetic_smoke_benchmark_writes_metrics_figures_and_report(
     assert "Certificates:" in report_text
     assert "`certified=True`" in report_text
     assert "learning_stability" in report_text
+    assert "topology_comparison" in report_text
 
 
 def test_render_benchmark_report_separates_claims_evidence_and_open_points() -> None:
@@ -163,6 +181,22 @@ def test_render_benchmark_report_separates_claims_evidence_and_open_points() -> 
                         "assumptions": ["projection applied after update"],
                         "limitation": "Post-projection stability certificate only.",
                     },
+                    "topology_comparison": {
+                        "theorem": (
+                            "theorem_03_empirical_persistence_diagram_comparison"
+                        ),
+                        "metric": "bottleneck",
+                        "homology_dim": 1,
+                        "distance": 0.05,
+                        "max_distance": 0.1,
+                        "input_n_points": 32,
+                        "latent_n_points": 32,
+                        "input_dominant_lifetime": 0.7,
+                        "latent_dominant_lifetime": 0.65,
+                        "is_certified": True,
+                        "assumptions": ["finite point clouds"],
+                        "limitation": "Empirical finite point-cloud comparison only.",
+                    },
                 },
             }
         },
@@ -186,7 +220,30 @@ def test_render_benchmark_report_separates_claims_evidence_and_open_points() -> 
     assert "required=`0.05`" in report
     assert "learning_stability" in report
     assert "margin_after=`0.6`" in report
+    assert "topology_comparison" in report
+    assert "h1 bottleneck=`0.05`" in report
+    assert "max=`0.1`" in report
     assert "TEMPORA Contractive CTRNN" in report
+
+
+def test_synthetic_benchmark_rejects_negative_topology_threshold(
+    tmp_path: Path,
+) -> None:
+    config = SyntheticBenchmarkConfig(
+        run_id="bad_threshold",
+        seed=1,
+        output_root=tmp_path / "outputs",
+        datasets=("circle",),
+        n_steps=16,
+        epochs=1,
+        learning_rate=0.03,
+        plasticity_learning_rate=0.0,
+        baseline_epochs=1,
+        topology_max_distance=-0.1,
+    )
+
+    with pytest.raises(ValueError, match="topology_max_distance"):
+        run_synthetic_benchmark(config)
 
 
 def test_current_git_commit_marks_workspace_safe(monkeypatch: Any) -> None:

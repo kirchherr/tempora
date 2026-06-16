@@ -40,7 +40,11 @@ from tempora.metrics import (
     time_warp_invariance_score,
 )
 from tempora.models import ContractiveCTRNN
-from tempora.proof import certify_model_contraction, certify_projected_update_stability
+from tempora.proof import (
+    certify_model_contraction,
+    certify_projected_update_stability,
+    certify_topology_comparison,
+)
 from tempora.training import save_contractive_ctrnn_checkpoint, train_circle_next_step
 from tempora.viz import plot_persistence_diagram
 
@@ -58,6 +62,7 @@ class SyntheticBenchmarkConfig:
     learning_rate: float
     plasticity_learning_rate: float
     baseline_epochs: int
+    topology_max_distance: float
 
     def to_jsonable(self) -> dict[str, object]:
         payload = asdict(self)
@@ -97,6 +102,7 @@ def load_benchmark_config(path: Path) -> SyntheticBenchmarkConfig:
         learning_rate=float(raw.get("learning_rate", 0.03)),
         plasticity_learning_rate=float(raw.get("plasticity_learning_rate", 5e-4)),
         baseline_epochs=int(raw.get("baseline_epochs", 4)),
+        topology_max_distance=float(raw.get("topology_max_distance", 1.0)),
     )
 
 
@@ -113,6 +119,8 @@ def run_synthetic_benchmark(
         raise ValueError("epochs must be positive.")
     if config.baseline_epochs < 1:
         raise ValueError("baseline_epochs must be positive.")
+    if config.topology_max_distance < 0.0:
+        raise ValueError("topology_max_distance must be non-negative.")
 
     started_at = time.perf_counter()
     output_dir = config.output_root / config.run_id
@@ -268,6 +276,12 @@ def run_dataset_benchmark(
             required_margin=model.margin,
         )
         certificates["learning_stability"] = learning_certificate.to_jsonable()
+    topology_certificate = certify_topology_comparison(
+        topology,
+        homology_dim=1,
+        max_distance=config.topology_max_distance,
+    )
+    certificates["topology_comparison"] = topology_certificate.to_jsonable()
     result: dict[str, Any] = {
         "dataset": dataset_name,
         "seed": seed,
@@ -408,6 +422,22 @@ def render_benchmark_report(metrics: dict[str, Any]) -> str:
                         f"`{learning_certificate['margin_after']:.6g}`, "
                         "required="
                         f"`{learning_certificate['required_margin']:.6g}`",
+                    ]
+                )
+            topology_certificate = cast(
+                dict[str, Any],
+                dataset_certificates.get("topology_comparison", {}),
+            )
+            if topology_certificate:
+                lines.extend(
+                    [
+                        "- topology_comparison: "
+                        f"`certified={topology_certificate['is_certified']}`, "
+                        f"h{topology_certificate['homology_dim']} "
+                        f"{topology_certificate['metric']}="
+                        f"`{topology_certificate['distance']:.6g}`, "
+                        "max="
+                        f"`{topology_certificate['max_distance']:.6g}`",
                     ]
                 )
             lines.append("")

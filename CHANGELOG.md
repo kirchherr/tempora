@@ -31,6 +31,8 @@ All notable changes to TEMPORA will be documented in this file.
 - Added benchmark contraction certificates in metrics and reports.
 - Added benchmark projected-learning stability certificates for the last
   plasticity update.
+- Added benchmark topology comparison certificates with a configured H1
+  persistence-distance threshold.
 - Added reusable checkpoint save/load helpers for contractive CTRNN artifacts.
 - Added conservative theory documentation for contraction, projected learning
   stability, and persistence-diagram comparison.
