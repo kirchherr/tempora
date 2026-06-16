@@ -62,6 +62,21 @@ def test_synthetic_smoke_benchmark_writes_metrics_figures_and_report(
         assert certificate["is_certified"] is True
         assert certificate["contraction_margin"] > certificate["required_margin"]
         assert certificate["assumptions"]
+        learning_certificate = dataset_metrics["certificates"]["learning_stability"]
+        assert (
+            learning_certificate["theorem"] == "theorem_02_projected_learning_stability"
+        )
+        assert learning_certificate["is_certified"] is True
+        assert (
+            learning_certificate["margin_after"]
+            > learning_certificate["required_margin"]
+        )
+        assert learning_certificate["update_norm"] >= 0.0
+        assert learning_certificate["assumptions"]
+        assert (
+            dataset_metrics["training"]["plasticity_last_update"]["margin_after"]
+            == learning_certificate["margin_after"]
+        )
         assert "gru" in dataset_metrics["baselines"]
         assert "vanilla_neural_ode" in dataset_metrics["baselines"]
         assert Path(dataset_metrics["figures"]["input_trajectory"]).exists()
@@ -83,6 +98,7 @@ def test_synthetic_smoke_benchmark_writes_metrics_figures_and_report(
     assert "## Dependency Versions" in report_text
     assert "Certificates:" in report_text
     assert "`certified=True`" in report_text
+    assert "learning_stability" in report_text
 
 
 def test_render_benchmark_report_separates_claims_evidence_and_open_points() -> None:
@@ -134,7 +150,19 @@ def test_render_benchmark_report_separates_claims_evidence_and_open_points() -> 
                         "is_certified": True,
                         "assumptions": ["bounded tanh nonlinearity"],
                         "limitation": "Sufficient contraction certificate only.",
-                    }
+                    },
+                    "learning_stability": {
+                        "theorem": "theorem_02_projected_learning_stability",
+                        "margin_before": 0.55,
+                        "margin_after": 0.6,
+                        "required_margin": 0.05,
+                        "weight_norm_before": 0.4,
+                        "weight_norm_after": 0.35,
+                        "update_norm": 0.01,
+                        "is_certified": True,
+                        "assumptions": ["projection applied after update"],
+                        "limitation": "Post-projection stability certificate only.",
+                    },
                 },
             }
         },
@@ -156,6 +184,8 @@ def test_render_benchmark_report_separates_claims_evidence_and_open_points() -> 
     assert "Certificates:" in report
     assert "`certified=True`" in report
     assert "required=`0.05`" in report
+    assert "learning_stability" in report
+    assert "margin_after=`0.6`" in report
     assert "TEMPORA Contractive CTRNN" in report
 
 

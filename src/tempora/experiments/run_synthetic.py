@@ -40,7 +40,7 @@ from tempora.metrics import (
     time_warp_invariance_score,
 )
 from tempora.models import ContractiveCTRNN
-from tempora.proof import certify_model_contraction
+from tempora.proof import certify_model_contraction, certify_projected_update_stability
 from tempora.training import save_contractive_ctrnn_checkpoint, train_circle_next_step
 from tempora.viz import plot_persistence_diagram
 
@@ -259,6 +259,15 @@ def run_dataset_benchmark(
         training_metrics=training.metrics,
     )
     contraction_certificate = certify_model_contraction(model)
+    certificates: dict[str, Any] = {
+        "contraction": contraction_certificate.to_jsonable(),
+    }
+    if training.last_plasticity_log is not None:
+        learning_certificate = certify_projected_update_stability(
+            training.last_plasticity_log,
+            required_margin=model.margin,
+        )
+        certificates["learning_stability"] = learning_certificate.to_jsonable()
     result: dict[str, Any] = {
         "dataset": dataset_name,
         "seed": seed,
@@ -285,9 +294,7 @@ def run_dataset_benchmark(
         "training": training.metrics,
         "topology": topology,
         "lyapunov": lyapunov.to_metrics(),
-        "certificates": {
-            "contraction": contraction_certificate.to_jsonable(),
-        },
+        "certificates": certificates,
         "baselines": baseline_report["models"],
         "figures": {
             "input_trajectory": str(input_figure),
@@ -386,6 +393,21 @@ def render_benchmark_report(metrics: dict[str, Any]) -> str:
                         f"`{contraction_certificate['contraction_margin']:.6g}`, "
                         "required="
                         f"`{contraction_certificate['required_margin']:.6g}`",
+                    ]
+                )
+            learning_certificate = cast(
+                dict[str, Any],
+                dataset_certificates.get("learning_stability", {}),
+            )
+            if learning_certificate:
+                lines.extend(
+                    [
+                        "- learning_stability: "
+                        f"`certified={learning_certificate['is_certified']}`, "
+                        "margin_after="
+                        f"`{learning_certificate['margin_after']:.6g}`, "
+                        "required="
+                        f"`{learning_certificate['required_margin']:.6g}`",
                     ]
                 )
             lines.append("")

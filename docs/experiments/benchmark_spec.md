@@ -32,7 +32,7 @@ and model examples live in the other `configs/*.yaml` files.
 - prediction MSE,
 - reconstruction MSE,
 - contraction margin,
-- sufficient-contraction certificate payload,
+- sufficient-contraction and projected-learning stability certificate payloads,
 - largest Lyapunov estimate,
 - H0/H1 persistence bottleneck distances,
 - time-warp invariance score,
@@ -67,11 +67,14 @@ kwargs, the resolved config, seed, dataset name, and training metrics.
 Use `tempora.training.load_contractive_ctrnn_checkpoint` to load a checkpoint
 and reconstruct the model with its metadata.
 
-`metrics.json` also stores a per-dataset sufficient-contraction certificate
-under `datasets.<name>.certificates.contraction`. The certificate is
-machine-readable and records the theorem identifier, assumptions, limitation,
-computed contraction margin, required margin, and certification result. The
-Markdown report repeats a compact certificate summary for review.
+`metrics.json` also stores per-dataset proof-adjacent certificates under
+`datasets.<name>.certificates`. The `contraction` certificate records the
+theorem identifier, assumptions, limitation, computed contraction margin,
+required margin, and certification result. When projected plasticity is enabled,
+`learning_stability` records the last projected Oja update, including the
+pre-update margin, post-projection margin, update norm, required margin, and
+certification result. The Markdown report repeats compact certificate summaries
+for review.
 
 ## Expected Failure Modes
 

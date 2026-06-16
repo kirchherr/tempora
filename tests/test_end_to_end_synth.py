@@ -35,5 +35,10 @@ def test_circle_smoke_training_decreases_loss_and_preserves_margin() -> None:
     assert result.metrics["loss_decreased"] is True
     assert result.metrics["final_loss"] < result.metrics["initial_loss"]
     assert result.metrics["contraction_margin_min"] > 0.09
+    assert result.last_plasticity_log is not None
+    assert result.last_plasticity_log.margin_after > model.margin
+    plasticity_last_update = result.metrics["plasticity_last_update"]
+    assert isinstance(plasticity_last_update, dict)
+    assert plasticity_last_update["margin_after"] > model.margin
     assert len(result.records) == 35
     json.dumps(result.metrics)
