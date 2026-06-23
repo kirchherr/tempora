@@ -63,11 +63,13 @@ class SyntheticBenchmarkConfig:
     plasticity_learning_rate: float
     baseline_epochs: int
     topology_max_distance: float
+    required_certificates: tuple[str, ...] = ("contraction",)
 
     def to_jsonable(self) -> dict[str, object]:
         payload = asdict(self)
         payload["output_root"] = str(self.output_root)
         payload["datasets"] = list(self.datasets)
+        payload["required_certificates"] = list(self.required_certificates)
         return payload
 
 
@@ -92,6 +94,12 @@ def load_benchmark_config(path: Path) -> SyntheticBenchmarkConfig:
     datasets = tuple(cast(DatasetName, item) for item in raw.get("datasets", []))
     if not datasets:
         raise ValueError("benchmark config must list at least one dataset.")
+    required_certificate_items = raw.get("required_certificates", ["contraction"])
+    required_certificates: tuple[str, ...]
+    if isinstance(required_certificate_items, str):
+        required_certificates = (required_certificate_items,)
+    else:
+        required_certificates = tuple(str(item) for item in required_certificate_items)
     return SyntheticBenchmarkConfig(
         run_id=str(raw.get("run_id", "benchmark_smoke")),
         seed=int(raw.get("seed", 42)),
@@ -103,6 +111,7 @@ def load_benchmark_config(path: Path) -> SyntheticBenchmarkConfig:
         plasticity_learning_rate=float(raw.get("plasticity_learning_rate", 5e-4)),
         baseline_epochs=int(raw.get("baseline_epochs", 4)),
         topology_max_distance=float(raw.get("topology_max_distance", 1.0)),
+        required_certificates=required_certificates,
     )
 
 
@@ -151,6 +160,12 @@ def run_synthetic_benchmark(
         for dataset_result in dataset_results.values()
     )
 
+    certificate_summary = summarize_benchmark_certificates(dataset_results)
+    certificate_gate = evaluate_certificate_gate(
+        dataset_results,
+        certificate_summary,
+        required_certificates=config.required_certificates,
+    )
     metrics: dict[str, Any] = {
         "run_id": config.run_id,
         "seed": config.seed,
@@ -169,7 +184,8 @@ def run_synthetic_benchmark(
             "elapsed_seconds": time.perf_counter() - started_at,
         },
         "datasets": dataset_results,
-        "certificate_summary": summarize_benchmark_certificates(dataset_results),
+        "certificate_summary": certificate_summary,
+        "certificate_gate": certificate_gate,
     }
     validate_json_metrics(metrics)
     metrics_path.write_text(
@@ -365,6 +381,7 @@ def render_benchmark_report(metrics: dict[str, Any]) -> str:
     lines.extend(_render_artifacts(metrics))
     lines.extend(_render_dependency_table(metrics))
     lines.extend(_render_certificate_summary(metrics))
+    lines.extend(_render_certificate_gate(metrics))
     datasets = cast(dict[str, Any], metrics["datasets"])
     for dataset_name, dataset_metrics in datasets.items():
         lines.extend(
@@ -506,6 +523,56 @@ def summarize_benchmark_certificates(datasets: dict[str, Any]) -> dict[str, Any]
     }
 
 
+def evaluate_certificate_gate(
+    datasets: dict[str, Any],
+    certificate_summary: dict[str, Any],
+    *,
+    required_certificates: tuple[str, ...],
+) -> dict[str, Any]:
+    """Evaluate a run-level gate over selected certificate types."""
+
+    dataset_count = len(datasets)
+    by_certificate = cast(dict[str, Any], certificate_summary.get("by_certificate", {}))
+    summary_failures = cast(
+        list[dict[str, Any]], certificate_summary.get("failures", [])
+    )
+    required = tuple(dict.fromkeys(required_certificates))
+    failures: list[dict[str, Any]] = []
+    for certificate_name in required:
+        counts = by_certificate.get(certificate_name)
+        if not isinstance(counts, dict):
+            failures.append(
+                {
+                    "certificate": certificate_name,
+                    "reason": "missing",
+                    "expected_datasets": dataset_count,
+                    "observed_datasets": 0,
+                }
+            )
+            continue
+        observed_total = int(counts.get("total", 0))
+        if observed_total < dataset_count:
+            failures.append(
+                {
+                    "certificate": certificate_name,
+                    "reason": "missing_some_datasets",
+                    "expected_datasets": dataset_count,
+                    "observed_datasets": observed_total,
+                }
+            )
+        if int(counts.get("failed", 0)) > 0:
+            failures.extend(
+                failure
+                for failure in summary_failures
+                if failure.get("certificate") == certificate_name
+            )
+    return {
+        "passed": not failures,
+        "required_certificates": list(required),
+        "failures": failures,
+    }
+
+
 def _certificate_failure_summary(
     dataset_name: str,
     certificate_name: str,
@@ -570,6 +637,58 @@ def _render_certificate_summary(metrics: dict[str, Any]) -> list[str]:
             lines.append(f"- {_format_certificate_failure(failure)}")
     lines.append("")
     return lines
+
+
+def _render_certificate_gate(metrics: dict[str, Any]) -> list[str]:
+    config = cast(dict[str, Any], metrics.get("config", {}))
+    datasets = cast(dict[str, Any], metrics.get("datasets", {}))
+    summary = cast(
+        dict[str, Any],
+        metrics.get("certificate_summary")
+        or summarize_benchmark_certificates(datasets),
+    )
+    required = tuple(str(item) for item in config.get("required_certificates", []))
+    gate = cast(
+        dict[str, Any],
+        metrics.get("certificate_gate")
+        or evaluate_certificate_gate(
+            datasets,
+            summary,
+            required_certificates=required,
+        ),
+    )
+    required_certificates = cast(list[str], gate.get("required_certificates", []))
+    required_text = (
+        ", ".join(f"`{certificate}`" for certificate in required_certificates)
+        if required_certificates
+        else "`none`"
+    )
+    lines = [
+        "## Certificate Gate",
+        "",
+        f"- passed: `{gate.get('passed', False)}`",
+        f"- required_certificates: {required_text}",
+    ]
+    failures = cast(list[dict[str, Any]], gate.get("failures", []))
+    if failures:
+        lines.extend(["", "Gate failures:"])
+        for failure in failures:
+            lines.append(f"- {_format_gate_failure(failure)}")
+    lines.append("")
+    return lines
+
+
+def _format_gate_failure(failure: dict[str, Any]) -> str:
+    if "reason" in failure:
+        certificate = failure.get("certificate", "unknown")
+        reason = failure.get("reason", "unknown")
+        expected = failure.get("expected_datasets", "unknown")
+        observed = failure.get("observed_datasets", "unknown")
+        return (
+            f"{certificate}: `{reason}`, "
+            f"observed=`{observed}`, expected=`{expected}`"
+        )
+    return _format_certificate_failure(failure)
 
 
 def _format_certificate_failure(failure: dict[str, Any]) -> str:
