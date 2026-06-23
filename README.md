@@ -142,6 +142,9 @@ See [docs/experiments/baseline_comparison_protocol.md](docs/experiments/baseline
 for the baseline comparison smoke protocol introduced in Phase 6.
 See [docs/experiments/benchmark_spec.md](docs/experiments/benchmark_spec.md)
 for the synthetic smoke benchmark introduced in Phase 7.
+See [docs/experiments/metrics_schema.md](docs/experiments/metrics_schema.md)
+for the `metrics.json` schema, certificate-summary fields, and certificate-gate
+policy used by the smoke benchmark.
 See [docs/theory/assumptions.md](docs/theory/assumptions.md) for the theory
 assumptions and theorem documents introduced through Phase 8.
 See [docs/release_v0_1.md](docs/release_v0_1.md) for the v0.1 release checklist.
