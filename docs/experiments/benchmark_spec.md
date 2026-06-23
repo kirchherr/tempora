@@ -46,6 +46,7 @@ Run:
 
 ```bash
 python scripts/train_synth.py --config configs/benchmark_smoke.yaml
+python scripts/check_certificates.py outputs/benchmark_smoke/metrics.json
 ```
 
 The command writes:
