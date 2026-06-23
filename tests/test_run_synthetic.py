@@ -3,12 +3,16 @@ from pathlib import Path
 from subprocess import CompletedProcess
 from typing import Any
 
+import pytest
 import yaml
 
 from tempora.experiments import load_benchmark_config, run_synthetic_benchmark
 from tempora.experiments.run_synthetic import (
+    SyntheticBenchmarkConfig,
     current_git_commit,
+    evaluate_certificate_gate,
     render_benchmark_report,
+    summarize_benchmark_certificates,
 )
 from tempora.training import load_contractive_ctrnn_checkpoint
 
@@ -29,6 +33,8 @@ def test_synthetic_smoke_benchmark_writes_metrics_figures_and_report(
                 "learning_rate": 0.03,
                 "plasticity_learning_rate": 0.0005,
                 "baseline_epochs": 2,
+                "topology_max_distance": 10.0,
+                "required_certificates": ["contraction", "learning_stability"],
             }
         ),
         encoding="utf-8",
@@ -44,6 +50,11 @@ def test_synthetic_smoke_benchmark_writes_metrics_figures_and_report(
     resolved_config = yaml.safe_load(result.config_path.read_text(encoding="utf-8"))
     assert resolved_config["run_id"] == "ci_smoke"
     assert resolved_config["datasets"] == ["circle", "torus", "lorenz", "rossler"]
+    assert resolved_config["topology_max_distance"] == 10.0
+    assert resolved_config["required_certificates"] == [
+        "contraction",
+        "learning_stability",
+    ]
 
     payload = json.loads(result.metrics_path.read_text(encoding="utf-8"))
     assert payload["run_id"] == "ci_smoke"
@@ -54,6 +65,30 @@ def test_synthetic_smoke_benchmark_writes_metrics_figures_and_report(
         str(path) for path in result.checkpoint_paths
     }
     assert payload["dependency_versions"]["torch"] is not None
+    certificate_summary = payload["certificate_summary"]
+    assert certificate_summary["all_certified"] is True
+    assert certificate_summary["failures"] == []
+    assert certificate_summary["by_certificate"]["contraction"] == {
+        "certified": 4,
+        "failed": 0,
+        "total": 4,
+    }
+    assert certificate_summary["by_certificate"]["learning_stability"] == {
+        "certified": 4,
+        "failed": 0,
+        "total": 4,
+    }
+    assert certificate_summary["by_certificate"]["topology_comparison"] == {
+        "certified": 4,
+        "failed": 0,
+        "total": 4,
+    }
+    certificate_gate = payload["certificate_gate"]
+    assert certificate_gate == {
+        "passed": True,
+        "required_certificates": ["contraction", "learning_stability"],
+        "failures": [],
+    }
     for dataset_name, dataset_metrics in payload["datasets"].items():
         assert dataset_metrics["prediction_mse"] >= 0.0
         assert dataset_metrics["contraction_margin_final"] > 0.0
@@ -77,6 +112,19 @@ def test_synthetic_smoke_benchmark_writes_metrics_figures_and_report(
             dataset_metrics["training"]["plasticity_last_update"]["margin_after"]
             == learning_certificate["margin_after"]
         )
+        topology_certificate = dataset_metrics["certificates"]["topology_comparison"]
+        assert (
+            topology_certificate["theorem"]
+            == "theorem_03_empirical_persistence_diagram_comparison"
+        )
+        assert topology_certificate["metric"] == "bottleneck"
+        assert topology_certificate["homology_dim"] == 1
+        assert topology_certificate["distance"] == dataset_metrics["tda_bottleneck_h1"]
+        assert topology_certificate["max_distance"] == 10.0
+        assert topology_certificate["is_certified"] is True
+        assert topology_certificate["input_n_points"] == config.n_steps
+        assert topology_certificate["latent_n_points"] == config.n_steps
+        assert topology_certificate["assumptions"]
         assert "gru" in dataset_metrics["baselines"]
         assert "vanilla_neural_ode" in dataset_metrics["baselines"]
         assert Path(dataset_metrics["figures"]["input_trajectory"]).exists()
@@ -96,16 +144,21 @@ def test_synthetic_smoke_benchmark_writes_metrics_figures_and_report(
     assert "## Run Metadata" in report_text
     assert "## Artifacts" in report_text
     assert "## Dependency Versions" in report_text
+    assert "## Certificate Summary" in report_text
+    assert "## Certificate Gate" in report_text
+    assert "passed: `True`" in report_text
+    assert "| topology_comparison | 4 | 0 | 4 |" in report_text
     assert "Certificates:" in report_text
     assert "`certified=True`" in report_text
     assert "learning_stability" in report_text
+    assert "topology_comparison" in report_text
 
 
 def test_render_benchmark_report_separates_claims_evidence_and_open_points() -> None:
     metrics = {
         "run_id": "example",
         "seed": 11,
-        "config": {"epochs": 1},
+        "config": {"epochs": 1, "required_certificates": ["contraction"]},
         "artifacts": {
             "config": "outputs/example/config.yaml",
             "metrics": "outputs/example/metrics.json",
@@ -163,6 +216,22 @@ def test_render_benchmark_report_separates_claims_evidence_and_open_points() -> 
                         "assumptions": ["projection applied after update"],
                         "limitation": "Post-projection stability certificate only.",
                     },
+                    "topology_comparison": {
+                        "theorem": (
+                            "theorem_03_empirical_persistence_diagram_comparison"
+                        ),
+                        "metric": "bottleneck",
+                        "homology_dim": 1,
+                        "distance": 0.05,
+                        "max_distance": 0.1,
+                        "input_n_points": 32,
+                        "latent_n_points": 32,
+                        "input_dominant_lifetime": 0.7,
+                        "latent_dominant_lifetime": 0.65,
+                        "is_certified": True,
+                        "assumptions": ["finite point clouds"],
+                        "limitation": "Empirical finite point-cloud comparison only.",
+                    },
                 },
             }
         },
@@ -175,6 +244,8 @@ def test_render_benchmark_report_separates_claims_evidence_and_open_points() -> 
     assert "## Run Metadata" in report
     assert "## Artifacts" in report
     assert "## Dependency Versions" in report
+    assert "## Certificate Summary" in report
+    assert "## Certificate Gate" in report
     assert "## Open Points" in report
     assert "git_commit: `abc123`" in report
     assert "outputs/example/config.yaml" in report
@@ -186,7 +257,137 @@ def test_render_benchmark_report_separates_claims_evidence_and_open_points() -> 
     assert "required=`0.05`" in report
     assert "learning_stability" in report
     assert "margin_after=`0.6`" in report
+    assert "topology_comparison" in report
+    assert "h1 bottleneck=`0.05`" in report
+    assert "max=`0.1`" in report
+    assert "| topology_comparison | 1 | 0 | 1 |" in report
+    assert "required_certificates: `contraction`" in report
     assert "TEMPORA Contractive CTRNN" in report
+
+
+def test_summarize_benchmark_certificates_records_failures() -> None:
+    datasets = {
+        "circle": {
+            "certificates": {
+                "topology_comparison": {
+                    "theorem": "theorem_03_empirical_persistence_diagram_comparison",
+                    "metric": "bottleneck",
+                    "homology_dim": 1,
+                    "distance": 1.2,
+                    "max_distance": 1.0,
+                    "is_certified": False,
+                }
+            }
+        },
+        "torus": {
+            "certificates": {
+                "topology_comparison": {
+                    "theorem": "theorem_03_empirical_persistence_diagram_comparison",
+                    "metric": "bottleneck",
+                    "homology_dim": 1,
+                    "distance": 0.7,
+                    "max_distance": 1.0,
+                    "is_certified": True,
+                }
+            }
+        },
+    }
+
+    summary = summarize_benchmark_certificates(datasets)
+
+    assert summary["all_certified"] is False
+    assert summary["by_certificate"]["topology_comparison"] == {
+        "certified": 1,
+        "failed": 1,
+        "total": 2,
+    }
+    assert summary["failures"] == [
+        {
+            "dataset": "circle",
+            "certificate": "topology_comparison",
+            "theorem": "theorem_03_empirical_persistence_diagram_comparison",
+            "metric": "bottleneck",
+            "homology_dim": 1,
+            "distance": 1.2,
+            "max_distance": 1.0,
+        }
+    ]
+
+
+def test_evaluate_certificate_gate_checks_only_required_certificates() -> None:
+    datasets = {
+        "circle": {
+            "certificates": {
+                "contraction": {
+                    "theorem": "theorem_01_sufficient_contraction",
+                    "contraction_margin": 0.2,
+                    "required_margin": 0.1,
+                    "is_certified": True,
+                },
+                "topology_comparison": {
+                    "theorem": "theorem_03_empirical_persistence_diagram_comparison",
+                    "metric": "bottleneck",
+                    "homology_dim": 1,
+                    "distance": 1.2,
+                    "max_distance": 1.0,
+                    "is_certified": False,
+                },
+            }
+        }
+    }
+    summary = summarize_benchmark_certificates(datasets)
+
+    contraction_gate = evaluate_certificate_gate(
+        datasets,
+        summary,
+        required_certificates=("contraction",),
+    )
+    topology_gate = evaluate_certificate_gate(
+        datasets,
+        summary,
+        required_certificates=("topology_comparison",),
+    )
+    missing_gate = evaluate_certificate_gate(
+        datasets,
+        summary,
+        required_certificates=("learning_stability",),
+    )
+
+    assert contraction_gate["passed"] is True
+    assert topology_gate["passed"] is False
+    assert topology_gate["failures"][0]["certificate"] == "topology_comparison"
+    assert missing_gate == {
+        "passed": False,
+        "required_certificates": ["learning_stability"],
+        "failures": [
+            {
+                "certificate": "learning_stability",
+                "reason": "missing",
+                "expected_datasets": 1,
+                "observed_datasets": 0,
+            }
+        ],
+    }
+
+
+def test_synthetic_benchmark_rejects_negative_topology_threshold(
+    tmp_path: Path,
+) -> None:
+    config = SyntheticBenchmarkConfig(
+        run_id="bad_threshold",
+        seed=1,
+        output_root=tmp_path / "outputs",
+        datasets=("circle",),
+        n_steps=16,
+        epochs=1,
+        learning_rate=0.03,
+        plasticity_learning_rate=0.0,
+        baseline_epochs=1,
+        topology_max_distance=-0.1,
+    )
+
+    with pytest.raises(ValueError, match="topology_max_distance"):
+        run_synthetic_benchmark(config)
 
 
 def test_current_git_commit_marks_workspace_safe(monkeypatch: Any) -> None:

@@ -11,4 +11,7 @@ epochs: 6
 learning_rate: 0.03
 plasticity_learning_rate: 0.0005
 baseline_epochs: 4
-
+topology_max_distance: 1.0
+required_certificates:
+  - contraction
+  - learning_stability

@@ -32,7 +32,8 @@ and model examples live in the other `configs/*.yaml` files.
 - prediction MSE,
 - reconstruction MSE,
 - contraction margin,
-- sufficient-contraction and projected-learning stability certificate payloads,
+- sufficient-contraction, projected-learning stability, and empirical topology
+  comparison certificate payloads,
 - largest Lyapunov estimate,
 - H0/H1 persistence bottleneck distances,
 - time-warp invariance score,
@@ -73,8 +74,20 @@ theorem identifier, assumptions, limitation, computed contraction margin,
 required margin, and certification result. When projected plasticity is enabled,
 `learning_stability` records the last projected Oja update, including the
 pre-update margin, post-projection margin, update norm, required margin, and
-certification result. The Markdown report repeats compact certificate summaries
-for review.
+certification result. `topology_comparison` records the empirical H1 persistence
+diagram distance against the configured `topology_max_distance` threshold. This
+threshold is a review policy for finite smoke artifacts, not a proof of semantic
+equivalence. The Markdown report repeats compact certificate summaries for
+review.
+
+At the run level, `metrics.json` stores `certificate_summary` with per
+certificate-type counts and an explicit list of failed certificates. The resolved
+config can also list `required_certificates`; these selected certificate types
+are evaluated into `certificate_gate`. This gate separates mandatory smoke-run
+checks from optional review evidence such as topology thresholds. The summary and
+gate are repeated in the Markdown report before the dataset sections so a
+reviewer can see immediately which proof-adjacent checks passed and which need
+attention.
 
 ## Expected Failure Modes
 
@@ -86,6 +99,8 @@ for review.
 ## Reproducibility Notes
 
 `metrics.json` stores the seed, resolved config, artifact paths, git commit hash
-when available, dependency versions, runtime metadata, and proof certificate
-payloads. The generated Markdown report repeats these reproducibility fields for
-review. Generated outputs are ignored by git.
+when available, dependency versions, runtime metadata, proof certificate
+payloads, certificate-summary counts, certificate-gate status, and the
+topology certificate threshold from the resolved config. The generated Markdown
+report repeats these reproducibility fields for review. Generated outputs are
+ignored by git.
