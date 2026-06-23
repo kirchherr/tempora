@@ -17,6 +17,7 @@ capability.
 - [ ] Run `docker compose build tempora`.
 - [ ] Run `docker compose run --rm tempora`.
 - [ ] Run `docker compose run --rm tempora python scripts/train_synth.py --config configs/benchmark_smoke.yaml`.
+- [ ] Run `docker compose run --rm tempora python scripts/check_certificates.py outputs/benchmark_smoke/metrics.json`.
 - [ ] Confirm `outputs/benchmark_smoke/metrics.json` exists after the smoke run.
 - [ ] Confirm `outputs/benchmark_smoke/config.yaml` exists after the smoke run.
 - [ ] Confirm `outputs/benchmark_smoke/report.md` exists after the smoke run.
@@ -26,7 +27,7 @@ capability.
 - [ ] Confirm generated outputs are not staged for commit.
 - [ ] Confirm docs and README links resolve.
 - [ ] Confirm GitHub Actions CI includes tests, linting, typing, and the smoke
-  benchmark command.
+  benchmark command and certificate gate check.
 - [ ] Confirm theory documents include assumptions, limitations, and related
   tests.
 - [ ] Confirm no invented benchmark results are added to docs or changelog.

@@ -36,6 +36,7 @@ All notable changes to TEMPORA will be documented in this file.
 - Added benchmark certificate-summary counts and failure listings.
 - Added benchmark certificate-gate policy for required proof-adjacent checks.
 - Added a CLI check for benchmark certificate gates in CI.
+- Documented the benchmark certificate gate in README and release checks.
 - Added reusable checkpoint save/load helpers for contractive CTRNN artifacts.
 - Added conservative theory documentation for contraction, projected learning
   stability, and persistence-diagram comparison.

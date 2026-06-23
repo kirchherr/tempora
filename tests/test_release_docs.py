@@ -32,6 +32,7 @@ def test_readme_contains_release_setup_and_smoke_commands() -> None:
         "python -m pip install -r requirements/docker-cpu.txt",
         "docker compose run --rm tempora",
         "python scripts/train_synth.py --config configs/benchmark_smoke.yaml",
+        "python scripts/check_certificates.py outputs/benchmark_smoke/metrics.json",
         "docs/release_v0_1.md",
         "LICENSE.md",
         "No invented benchmark results",
@@ -51,6 +52,8 @@ def test_release_checklist_mentions_doc_link_verification() -> None:
     text = (ROOT / "docs/release_v0_1.md").read_text(encoding="utf-8")
 
     assert "Confirm docs and README links resolve" in text
+    assert "scripts/check_certificates.py outputs/benchmark_smoke/metrics.json" in text
+    assert "certificate gate check" in text
 
 
 def test_release_docs_do_not_embed_benchmark_results() -> None:
