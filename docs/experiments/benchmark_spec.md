@@ -90,6 +90,9 @@ gate are repeated in the Markdown report before the dataset sections so a
 reviewer can see immediately which proof-adjacent checks passed and which need
 attention.
 
+See [metrics_schema.md](metrics_schema.md) for the expected `metrics.json`
+field layout, certificate payload structure, and gate semantics.
+
 ## Expected Failure Modes
 
 - non-finite metrics,
