@@ -5,7 +5,10 @@ import json
 from pathlib import Path
 from typing import Any, cast
 
-from tempora.experiments.run_synthetic import render_benchmark_report
+from tempora.experiments.run_synthetic import (
+    render_benchmark_report,
+    validate_benchmark_metrics,
+)
 
 
 def main() -> None:
@@ -16,6 +19,7 @@ def main() -> None:
 
     metrics_path = Path(args.metrics)
     metrics = cast(dict[str, Any], json.loads(metrics_path.read_text(encoding="utf-8")))
+    validate_benchmark_metrics(metrics)
     report = render_benchmark_report(metrics)
     output_path = (
         Path(args.output)

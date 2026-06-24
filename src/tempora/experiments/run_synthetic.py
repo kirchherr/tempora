@@ -187,7 +187,7 @@ def run_synthetic_benchmark(
         "certificate_summary": certificate_summary,
         "certificate_gate": certificate_gate,
     }
-    validate_json_metrics(metrics)
+    validate_benchmark_metrics(metrics)
     metrics_path.write_text(
         json.dumps(metrics, indent=2, sort_keys=True), encoding="utf-8"
     )
@@ -571,6 +571,316 @@ def evaluate_certificate_gate(
         "required_certificates": list(required),
         "failures": failures,
     }
+
+
+def validate_benchmark_metrics(metrics: dict[str, Any]) -> None:
+    """Validate the benchmark `metrics.json` payload structure.
+
+    The validator checks the stable schema consumed by report rendering,
+    release review, and certificate-gate tooling. It intentionally validates
+    structure and finite JSON values; it does not certify scientific claims.
+    """
+
+    validate_json_metrics(metrics)
+    _require_keys(
+        metrics,
+        (
+            "run_id",
+            "seed",
+            "config",
+            "artifacts",
+            "git_commit",
+            "dependency_versions",
+            "runtime",
+            "datasets",
+            "certificate_summary",
+            "certificate_gate",
+        ),
+        "metrics",
+    )
+    _require_non_empty_string(metrics["run_id"], "metrics.run_id")
+    _require_int(metrics["seed"], "metrics.seed")
+    _validate_metrics_config(_require_mapping(metrics["config"], "metrics.config"))
+    _validate_metrics_artifacts(
+        _require_mapping(metrics["artifacts"], "metrics.artifacts")
+    )
+    if metrics["git_commit"] is not None:
+        _require_non_empty_string(metrics["git_commit"], "metrics.git_commit")
+    _require_mapping(
+        metrics["dependency_versions"],
+        "metrics.dependency_versions",
+    )
+    _validate_runtime(_require_mapping(metrics["runtime"], "metrics.runtime"))
+    datasets = _require_mapping(metrics["datasets"], "metrics.datasets")
+    if not datasets:
+        raise ValueError("metrics.datasets must contain at least one dataset.")
+    for dataset_name, dataset_payload in datasets.items():
+        if not isinstance(dataset_name, str) or not dataset_name:
+            raise ValueError("metrics.datasets keys must be non-empty strings.")
+        _validate_dataset_metrics(
+            _require_mapping(dataset_payload, f"metrics.datasets.{dataset_name}"),
+            f"metrics.datasets.{dataset_name}",
+        )
+    _validate_certificate_summary(
+        _require_mapping(
+            metrics["certificate_summary"],
+            "metrics.certificate_summary",
+        )
+    )
+    _validate_certificate_gate(
+        _require_mapping(metrics["certificate_gate"], "metrics.certificate_gate")
+    )
+
+
+def _validate_metrics_config(config: dict[str, Any]) -> None:
+    _require_keys(
+        config,
+        (
+            "run_id",
+            "seed",
+            "output_root",
+            "datasets",
+            "n_steps",
+            "epochs",
+            "learning_rate",
+            "plasticity_learning_rate",
+            "baseline_epochs",
+            "topology_max_distance",
+            "required_certificates",
+        ),
+        "metrics.config",
+    )
+    _require_non_empty_string(config["run_id"], "metrics.config.run_id")
+    _require_int(config["seed"], "metrics.config.seed")
+    _require_non_empty_string(config["output_root"], "metrics.config.output_root")
+    _require_string_list(config["datasets"], "metrics.config.datasets")
+    _require_int(config["n_steps"], "metrics.config.n_steps")
+    _require_int(config["epochs"], "metrics.config.epochs")
+    _require_number(config["learning_rate"], "metrics.config.learning_rate")
+    _require_number(
+        config["plasticity_learning_rate"],
+        "metrics.config.plasticity_learning_rate",
+    )
+    _require_int(config["baseline_epochs"], "metrics.config.baseline_epochs")
+    _require_number(
+        config["topology_max_distance"],
+        "metrics.config.topology_max_distance",
+    )
+    _require_string_list(
+        config["required_certificates"],
+        "metrics.config.required_certificates",
+    )
+
+
+def _validate_metrics_artifacts(artifacts: dict[str, Any]) -> None:
+    _require_keys(
+        artifacts,
+        ("config", "metrics", "report", "checkpoints"),
+        "metrics.artifacts",
+    )
+    _require_non_empty_string(artifacts["config"], "metrics.artifacts.config")
+    _require_non_empty_string(artifacts["metrics"], "metrics.artifacts.metrics")
+    _require_non_empty_string(artifacts["report"], "metrics.artifacts.report")
+    _require_string_list(artifacts["checkpoints"], "metrics.artifacts.checkpoints")
+
+
+def _validate_runtime(runtime: dict[str, Any]) -> None:
+    _require_keys(
+        runtime,
+        ("python", "platform", "elapsed_seconds"),
+        "metrics.runtime",
+    )
+    _require_non_empty_string(runtime["python"], "metrics.runtime.python")
+    _require_non_empty_string(runtime["platform"], "metrics.runtime.platform")
+    _require_number(runtime["elapsed_seconds"], "metrics.runtime.elapsed_seconds")
+
+
+def _validate_dataset_metrics(dataset: dict[str, Any], location: str) -> None:
+    _require_keys(
+        dataset,
+        (
+            "dataset",
+            "seed",
+            "model",
+            "checkpoint",
+            "prediction_mse",
+            "reconstruction_mse",
+            "contraction_margin_min",
+            "contraction_margin_final",
+            "largest_lyapunov_estimate",
+            "tda_bottleneck_h0",
+            "tda_bottleneck_h1",
+            "time_warp_invariance_score",
+            "noise_robustness_score",
+            "missing_segment_robustness_score",
+            "training",
+            "topology",
+            "lyapunov",
+            "certificates",
+            "baselines",
+            "figures",
+        ),
+        location,
+    )
+    _require_non_empty_string(dataset["dataset"], f"{location}.dataset")
+    _require_int(dataset["seed"], f"{location}.seed")
+    _require_non_empty_string(dataset["model"], f"{location}.model")
+    _require_non_empty_string(dataset["checkpoint"], f"{location}.checkpoint")
+    for metric_name in (
+        "prediction_mse",
+        "reconstruction_mse",
+        "contraction_margin_min",
+        "contraction_margin_final",
+        "largest_lyapunov_estimate",
+        "tda_bottleneck_h0",
+        "tda_bottleneck_h1",
+        "time_warp_invariance_score",
+        "noise_robustness_score",
+        "missing_segment_robustness_score",
+    ):
+        _require_number(dataset[metric_name], f"{location}.{metric_name}")
+    _require_mapping(dataset["training"], f"{location}.training")
+    _require_mapping(dataset["topology"], f"{location}.topology")
+    _require_mapping(dataset["lyapunov"], f"{location}.lyapunov")
+    certificates = _require_mapping(dataset["certificates"], f"{location}.certificates")
+    if not certificates:
+        raise ValueError(f"{location}.certificates must not be empty.")
+    for certificate_name, certificate_payload in certificates.items():
+        if not isinstance(certificate_name, str) or not certificate_name:
+            raise ValueError(f"{location}.certificates keys must be non-empty strings.")
+        _validate_certificate_payload(
+            _require_mapping(
+                certificate_payload,
+                f"{location}.certificates.{certificate_name}",
+            ),
+            f"{location}.certificates.{certificate_name}",
+        )
+    _require_mapping(dataset["baselines"], f"{location}.baselines")
+    _require_mapping(dataset["figures"], f"{location}.figures")
+
+
+def _validate_certificate_payload(certificate: dict[str, Any], location: str) -> None:
+    _require_keys(
+        certificate,
+        ("theorem", "is_certified", "assumptions", "limitation"),
+        location,
+    )
+    _require_non_empty_string(certificate["theorem"], f"{location}.theorem")
+    _require_bool(certificate["is_certified"], f"{location}.is_certified")
+    _require_string_list(certificate["assumptions"], f"{location}.assumptions")
+    _require_non_empty_string(certificate["limitation"], f"{location}.limitation")
+
+
+def _validate_certificate_summary(summary: dict[str, Any]) -> None:
+    _require_keys(
+        summary,
+        ("all_certified", "by_certificate", "failures"),
+        "metrics.certificate_summary",
+    )
+    _require_bool(
+        summary["all_certified"],
+        "metrics.certificate_summary.all_certified",
+    )
+    by_certificate = _require_mapping(
+        summary["by_certificate"],
+        "metrics.certificate_summary.by_certificate",
+    )
+    for certificate_name, counts_payload in by_certificate.items():
+        if not isinstance(certificate_name, str) or not certificate_name:
+            raise ValueError(
+                "metrics.certificate_summary.by_certificate keys must be "
+                "non-empty strings."
+            )
+        counts = _require_mapping(
+            counts_payload,
+            f"metrics.certificate_summary.by_certificate.{certificate_name}",
+        )
+        _require_keys(
+            counts,
+            ("total", "certified", "failed"),
+            f"metrics.certificate_summary.by_certificate.{certificate_name}",
+        )
+        _require_int(
+            counts["total"],
+            f"metrics.certificate_summary.by_certificate.{certificate_name}.total",
+        )
+        _require_int(
+            counts["certified"],
+            f"metrics.certificate_summary.by_certificate.{certificate_name}.certified",
+        )
+        _require_int(
+            counts["failed"],
+            f"metrics.certificate_summary.by_certificate.{certificate_name}.failed",
+        )
+    _require_list(summary["failures"], "metrics.certificate_summary.failures")
+
+
+def _validate_certificate_gate(gate: dict[str, Any]) -> None:
+    _require_keys(
+        gate,
+        ("passed", "required_certificates", "failures"),
+        "metrics.certificate_gate",
+    )
+    _require_bool(gate["passed"], "metrics.certificate_gate.passed")
+    _require_string_list(
+        gate["required_certificates"],
+        "metrics.certificate_gate.required_certificates",
+    )
+    _require_list(gate["failures"], "metrics.certificate_gate.failures")
+
+
+def _require_keys(
+    payload: dict[str, Any],
+    required_keys: tuple[str, ...],
+    location: str,
+) -> None:
+    missing = [key for key in required_keys if key not in payload]
+    if missing:
+        missing_text = ", ".join(missing)
+        raise ValueError(f"{location} missing required field(s): {missing_text}.")
+
+
+def _require_mapping(value: Any, location: str) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise ValueError(f"{location} must be a JSON object.")
+    return cast(dict[str, Any], value)
+
+
+def _require_list(value: Any, location: str) -> list[Any]:
+    if not isinstance(value, list):
+        raise ValueError(f"{location} must be a JSON list.")
+    return value
+
+
+def _require_string_list(value: Any, location: str) -> list[str]:
+    items = _require_list(value, location)
+    if not all(isinstance(item, str) and item for item in items):
+        raise ValueError(f"{location} must contain only non-empty strings.")
+    return cast(list[str], items)
+
+
+def _require_non_empty_string(value: Any, location: str) -> str:
+    if not isinstance(value, str) or not value:
+        raise ValueError(f"{location} must be a non-empty string.")
+    return value
+
+
+def _require_int(value: Any, location: str) -> int:
+    if not isinstance(value, int) or isinstance(value, bool):
+        raise ValueError(f"{location} must be an integer.")
+    return value
+
+
+def _require_number(value: Any, location: str) -> float:
+    if not isinstance(value, int | float) or isinstance(value, bool):
+        raise ValueError(f"{location} must be numeric.")
+    return float(value)
+
+
+def _require_bool(value: Any, location: str) -> bool:
+    if not isinstance(value, bool):
+        raise ValueError(f"{location} must be boolean.")
+    return value
 
 
 def _certificate_failure_summary(

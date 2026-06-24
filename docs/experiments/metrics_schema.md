@@ -109,12 +109,17 @@ A benchmark result should not be reported unless the corresponding
 `metrics.json`, `config.yaml`, generated figures, checkpoint artifacts, and
 `report.md` were produced by an actual run under `outputs/<run_id>/`.
 
-For release review, regenerate the smoke benchmark and then run:
+For release review, regenerate the smoke benchmark and then validate the metrics
+schema before checking certificates:
 
 ```bash
+python scripts/validate_metrics.py outputs/benchmark_smoke/metrics.json
 python scripts/check_certificates.py outputs/benchmark_smoke/metrics.json
 ```
 
-This command checks the stored `certificate_gate` when present and can recompute
-the gate from `datasets`, `certificate_summary`, and `config.required_certificates`
+The schema validator checks the stable top-level fields, dataset records,
+certificate payload shape, run-level summary, gate fields, and finite JSON
+values. The certificate command checks the stored `certificate_gate` when present
+and can recompute the gate from `datasets`, `certificate_summary`, and
+`config.required_certificates`
 for older compatible metrics files.
