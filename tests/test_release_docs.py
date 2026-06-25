@@ -32,7 +32,8 @@ def test_readme_contains_release_setup_and_smoke_commands() -> None:
         "python -m pip install -r requirements/docker-cpu.txt",
         "docker compose run --rm tempora",
         "python scripts/train_synth.py --config configs/benchmark_smoke.yaml",
-        "python scripts/validate_metrics.py outputs/benchmark_smoke/metrics.json",
+        "python scripts/validate_metrics.py "
+        "outputs/benchmark_smoke/metrics.json --check-files",
         "python scripts/check_certificates.py outputs/benchmark_smoke/metrics.json",
         "docs/release_v0_1.md",
         "LICENSE.md",

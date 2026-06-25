@@ -64,10 +64,10 @@ Run the CI-small synthetic smoke benchmark:
 docker compose run --rm tempora python scripts/train_synth.py --config configs/benchmark_smoke.yaml
 ```
 
-Validate the generated benchmark metrics schema:
+Validate the generated benchmark metrics schema and artifact paths:
 
 ```bash
-docker compose run --rm tempora python scripts/validate_metrics.py outputs/benchmark_smoke/metrics.json
+docker compose run --rm tempora python scripts/validate_metrics.py outputs/benchmark_smoke/metrics.json --check-files
 ```
 
 Example dataset and model configs live under `configs/`, including

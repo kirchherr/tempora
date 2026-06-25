@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from scripts.validate_metrics import collect_artifact_paths, validate_artifact_paths
 
 from tempora.experiments.run_synthetic import validate_benchmark_metrics
 
@@ -36,12 +37,58 @@ def test_validate_benchmark_metrics_rejects_non_finite_values() -> None:
         validate_benchmark_metrics(metrics)
 
 
+def test_collect_artifact_paths_deduplicates_referenced_files() -> None:
+    paths = collect_artifact_paths(_valid_metrics())
+
+    assert Path("outputs/benchmark_smoke/config.yaml") in paths
+    assert Path("outputs/benchmark_smoke/metrics.json") in paths
+    assert Path("outputs/benchmark_smoke/report.md") in paths
+    assert Path("outputs/benchmark_smoke/checkpoints/circle.pt") in paths
+    assert Path("outputs/benchmark_smoke/figures/circle_input.png") in paths
+    assert len(paths) == len(set(paths))
+
+
+def test_validate_artifact_paths_accepts_existing_files(tmp_path: Path) -> None:
+    metrics = _valid_metrics_with_absolute_artifacts(tmp_path)
+    for artifact_path in collect_artifact_paths(metrics):
+        artifact_path.parent.mkdir(parents=True, exist_ok=True)
+        artifact_path.write_text("artifact", encoding="utf-8")
+
+    validate_artifact_paths(metrics, base_dir=Path.cwd())
+
+
+def test_validate_artifact_paths_rejects_missing_files(tmp_path: Path) -> None:
+    metrics = _valid_metrics_with_absolute_artifacts(tmp_path)
+
+    with pytest.raises(FileNotFoundError, match="circle_input.png"):
+        validate_artifact_paths(metrics, base_dir=Path.cwd())
+
+
 def test_validate_metrics_cli_accepts_schema_payload(tmp_path: Path) -> None:
     metrics_path = tmp_path / "metrics.json"
     metrics_path.write_text(json.dumps(_valid_metrics()), encoding="utf-8")
 
     completed = subprocess.run(
         [sys.executable, str(SCRIPT), str(metrics_path)],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 0
+    assert "metrics schema valid" in completed.stdout
+
+
+def test_validate_metrics_cli_accepts_existing_artifacts(tmp_path: Path) -> None:
+    metrics = _valid_metrics_with_absolute_artifacts(tmp_path)
+    for artifact_path in collect_artifact_paths(metrics):
+        artifact_path.parent.mkdir(parents=True, exist_ok=True)
+        artifact_path.write_text("artifact", encoding="utf-8")
+    metrics_path = tmp_path / "metrics.json"
+    metrics_path.write_text(json.dumps(metrics), encoding="utf-8")
+
+    completed = subprocess.run(
+        [sys.executable, str(SCRIPT), str(metrics_path), "--check-files"],
         check=False,
         capture_output=True,
         text=True,
@@ -66,6 +113,42 @@ def test_validate_metrics_cli_rejects_schema_payload(tmp_path: Path) -> None:
 
     assert completed.returncode == 1
     assert "certificate_gate" in completed.stderr
+
+
+def test_validate_metrics_cli_rejects_missing_artifacts(tmp_path: Path) -> None:
+    metrics = _valid_metrics_with_absolute_artifacts(tmp_path)
+    metrics_path = tmp_path / "metrics.json"
+    metrics_path.write_text(json.dumps(metrics), encoding="utf-8")
+
+    completed = subprocess.run(
+        [sys.executable, str(SCRIPT), str(metrics_path), "--check-files"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 1
+    assert "circle_input.png" in completed.stderr
+
+
+def _valid_metrics_with_absolute_artifacts(tmp_path: Path) -> dict[str, Any]:
+    metrics = _valid_metrics()
+    output_dir = tmp_path / "benchmark_smoke"
+    checkpoint_path = output_dir / "checkpoints" / "circle.pt"
+    figure_path = output_dir / "figures" / "circle_input.png"
+    metrics["artifacts"] = {
+        "config": str(output_dir / "config.yaml"),
+        "metrics": str(output_dir / "metrics.json"),
+        "report": str(output_dir / "report.md"),
+        "checkpoints": [str(checkpoint_path)],
+    }
+    datasets = metrics["datasets"]
+    assert isinstance(datasets, dict)
+    circle = datasets["circle"]
+    assert isinstance(circle, dict)
+    circle["checkpoint"] = str(checkpoint_path)
+    circle["figures"] = {"input_trajectory": str(figure_path)}
+    return metrics
 
 
 def _valid_metrics() -> dict[str, Any]:

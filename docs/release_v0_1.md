@@ -17,7 +17,7 @@ capability.
 - [ ] Run `docker compose build tempora`.
 - [ ] Run `docker compose run --rm tempora`.
 - [ ] Run `docker compose run --rm tempora python scripts/train_synth.py --config configs/benchmark_smoke.yaml`.
-- [ ] Run `docker compose run --rm tempora python scripts/validate_metrics.py outputs/benchmark_smoke/metrics.json`.
+- [ ] Run `docker compose run --rm tempora python scripts/validate_metrics.py outputs/benchmark_smoke/metrics.json --check-files`.
 - [ ] Run `docker compose run --rm tempora python scripts/check_certificates.py outputs/benchmark_smoke/metrics.json`.
 - [ ] Confirm `outputs/benchmark_smoke/metrics.json` exists after the smoke run.
 - [ ] Confirm `outputs/benchmark_smoke/config.yaml` exists after the smoke run.
