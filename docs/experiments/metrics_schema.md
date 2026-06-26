@@ -113,7 +113,7 @@ For release review, regenerate the smoke benchmark and then validate the metrics
 schema before checking certificates:
 
 ```bash
-python scripts/validate_metrics.py outputs/benchmark_smoke/metrics.json
+python scripts/validate_metrics.py outputs/benchmark_smoke/metrics.json --check-files
 python scripts/check_certificates.py outputs/benchmark_smoke/metrics.json
 ```
 
