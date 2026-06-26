@@ -58,7 +58,13 @@ Run the full check suite in Docker:
 docker compose run --rm tempora
 ```
 
-Run the CI-small synthetic smoke benchmark:
+Run the complete release smoke path:
+
+```bash
+docker compose run --rm tempora python scripts/release_smoke.py --config configs/benchmark_smoke.yaml
+```
+
+Run the CI-small synthetic smoke benchmark directly:
 
 ```bash
 docker compose run --rm tempora python scripts/train_synth.py --config configs/benchmark_smoke.yaml

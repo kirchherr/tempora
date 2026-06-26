@@ -21,11 +21,7 @@ def test_ci_runs_standard_checks_and_smoke_benchmark() -> None:
         "python -m ruff check .",
         "python -m ruff format --check .",
         "python -m mypy src",
-        "python scripts/train_synth.py --config configs/benchmark_smoke.yaml",
-        "python scripts/validate_metrics.py "
-        "outputs/benchmark_smoke/metrics.json --check-files",
-        "python scripts/make_report.py outputs/benchmark_smoke/metrics.json",
-        "python scripts/check_certificates.py outputs/benchmark_smoke/metrics.json",
+        "python scripts/release_smoke.py --config configs/benchmark_smoke.yaml",
         "test -f outputs/benchmark_smoke/config.yaml",
         "test -f outputs/benchmark_smoke/metrics.json",
         "test -f outputs/benchmark_smoke/report.md",
