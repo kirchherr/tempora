@@ -44,3 +44,4 @@ jobs:
           test -f outputs/benchmark_smoke/config.yaml
           test -f outputs/benchmark_smoke/metrics.json
           test -f outputs/benchmark_smoke/report.md
+          test -f outputs/benchmark_smoke/artifact_manifest.json

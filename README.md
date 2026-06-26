@@ -64,6 +64,9 @@ Run the complete release smoke path:
 docker compose run --rm tempora python scripts/release_smoke.py --config configs/benchmark_smoke.yaml
 ```
 
+This writes `artifact_manifest.json` with SHA256 checksums and file sizes for
+the generated benchmark artifacts.
+
 Run the CI-small synthetic smoke benchmark directly:
 
 ```bash

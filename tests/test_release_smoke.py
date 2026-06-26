@@ -1,9 +1,10 @@
+import json
 from pathlib import Path
 from typing import Any
 
 import pytest
 import yaml
-from scripts.release_smoke import main, run_release_smoke
+from scripts.release_smoke import build_artifact_manifest, main, run_release_smoke
 
 from tempora.experiments.run_synthetic import SyntheticBenchmarkResult
 
@@ -33,6 +34,18 @@ def test_run_release_smoke_renders_report_and_checks_gate(
     assert "TEMPORA Synthetic Benchmark" in result.report_path.read_text(
         encoding="utf-8"
     )
+    manifest_path = result.output_dir / "artifact_manifest.json"
+    assert manifest_path.exists()
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert manifest["run_id"] == "benchmark_smoke"
+    assert manifest["artifact_count"] == len(manifest["artifacts"])
+    report_entries = [
+        entry
+        for entry in manifest["artifacts"]
+        if entry["path"] == str(result.report_path)
+    ]
+    assert report_entries
+    assert len(report_entries[0]["sha256"]) == 64
     assert "passed=True" in capsys.readouterr().out
 
 
@@ -72,6 +85,19 @@ def test_release_smoke_main_returns_failure(
     assert "release smoke failed" in capsys.readouterr().err
 
 
+def test_build_artifact_manifest_is_sorted_and_records_file_size(
+    tmp_path: Path,
+) -> None:
+    result = _result(tmp_path, passed=True)
+
+    manifest = build_artifact_manifest(result.metrics, base_dir=Path.cwd())
+
+    artifact_paths = [entry["path"] for entry in manifest["artifacts"]]
+    assert artifact_paths == sorted(artifact_paths)
+    assert manifest["artifact_count"] == len(artifact_paths)
+    assert all(entry["bytes"] > 0 for entry in manifest["artifacts"])
+
+
 def _write_config(tmp_path: Path) -> Path:
     config_path = tmp_path / "benchmark.yaml"
     config_path.write_text(
@@ -102,14 +128,22 @@ def _result(tmp_path: Path, *, passed: bool) -> SyntheticBenchmarkResult:
     report_path = output_dir / "report.md"
     checkpoint_path = output_dir / "checkpoints" / "circle.pt"
     report_path.parent.mkdir(parents=True, exist_ok=True)
+    checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
+    figure_path = output_dir / "figures" / "circle_input.png"
+    figure_path.parent.mkdir(parents=True, exist_ok=True)
     metrics = _valid_metrics(
         config_path=config_path,
         metrics_path=metrics_path,
         report_path=report_path,
         checkpoint_path=checkpoint_path,
-        figure_path=output_dir / "figures" / "circle_input.png",
+        figure_path=figure_path,
         passed=passed,
     )
+    config_path.write_text("config", encoding="utf-8")
+    metrics_path.write_text("metrics", encoding="utf-8")
+    report_path.write_text("report", encoding="utf-8")
+    checkpoint_path.write_text("checkpoint", encoding="utf-8")
+    figure_path.write_text("figure", encoding="utf-8")
     return SyntheticBenchmarkResult(
         output_dir=output_dir,
         config_path=config_path,

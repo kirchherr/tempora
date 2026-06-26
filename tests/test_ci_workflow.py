@@ -25,6 +25,7 @@ def test_ci_runs_standard_checks_and_smoke_benchmark() -> None:
         "test -f outputs/benchmark_smoke/config.yaml",
         "test -f outputs/benchmark_smoke/metrics.json",
         "test -f outputs/benchmark_smoke/report.md",
+        "test -f outputs/benchmark_smoke/artifact_manifest.json",
     )
     for command in required_commands:
         assert command in workflow_text

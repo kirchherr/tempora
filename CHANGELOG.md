@@ -42,6 +42,7 @@ All notable changes to TEMPORA will be documented in this file.
 - Extended the benchmark metrics validator to verify generated artifact paths.
 - Added a release smoke CLI that runs benchmark generation, metrics validation,
   report rendering, and certificate gate checks.
+- Added release smoke artifact manifests with file sizes and SHA256 checksums.
 - Added reusable checkpoint save/load helpers for contractive CTRNN artifacts.
 - Added conservative theory documentation for contraction, projected learning
   stability, and persistence-diagram comparison.
