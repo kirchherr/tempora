@@ -65,6 +65,47 @@ def test_build_evidence_index_records_failed_certificate_gate() -> None:
 
     assert index["all_certificate_gates_passed"] is False
     assert index["runs"][0]["certificate_gate"]["failure_count"] == 1
+    assert index["runs"][0]["certificate_gate"]["failures"] == [
+        {
+            "certificate": "contraction",
+            "dataset": "circle",
+            "theorem": "theorem_01_sufficient_contraction",
+        }
+    ]
+    assert index["runs"][0]["certificate_summary"]["failures"] == [
+        {
+            "certificate": "contraction",
+            "dataset": "circle",
+            "theorem": "theorem_01_sufficient_contraction",
+        }
+    ]
+
+
+def test_build_evidence_index_records_optional_certificate_failures() -> None:
+    metrics = _valid_metrics()
+    optional_failure = {
+        "dataset": "torus",
+        "certificate": "topology_comparison",
+        "theorem": "theorem_03_empirical_persistence_diagram_comparison",
+        "distance": 1.2,
+        "max_distance": 1.0,
+    }
+    metrics["certificate_summary"]["all_certified"] = False
+    metrics["certificate_summary"]["failures"] = [optional_failure]
+    record = EvidenceRunRecord(
+        metrics_path=Path("outputs/benchmark_smoke/metrics.json"),
+        metrics=metrics,
+    )
+
+    index = build_evidence_index((record,))
+
+    assert index["all_certificate_gates_passed"] is True
+    run = index["runs"][0]
+    assert run["certificate_gate"]["failure_count"] == 0
+    assert run["certificate_gate"]["failures"] == []
+    assert run["certificate_summary"]["all_certified"] is False
+    assert run["certificate_summary"]["failure_count"] == 1
+    assert run["certificate_summary"]["failures"] == [optional_failure]
 
 
 def test_build_evidence_index_rejects_manifest_run_id_mismatch() -> None:

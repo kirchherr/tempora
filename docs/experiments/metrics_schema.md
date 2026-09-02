@@ -115,6 +115,9 @@ Generated runs can be summarized with `scripts/build_evidence_index.py` into
 files. Use `scripts/validate_evidence_index.py` to check that the generated
 index is internally consistent and, when requested, references manifests, git
 commits, existing files, and passing certificate gates.
+The index preserves compact certificate-summary and certificate-gate failure
+records so optional review failures remain visible even when the required gate
+passes.
 
 For release review, regenerate the smoke benchmark and then validate the metrics
 schema before checking certificates:

@@ -176,11 +176,13 @@ def _valid_index() -> dict[str, Any]:
                 "certificate_summary": {
                     "all_certified": True,
                     "failure_count": 0,
+                    "failures": [],
                 },
                 "certificate_gate": {
                     "passed": True,
                     "required_certificates": ["contraction"],
                     "failure_count": 0,
+                    "failures": [],
                 },
             }
         ],

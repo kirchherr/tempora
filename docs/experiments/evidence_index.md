@@ -35,7 +35,9 @@ The index records:
 - optional artifact manifest path and artifact count,
 - certificate types,
 - certificate-summary failure count,
+- compact certificate-summary failure records,
 - certificate-gate status and required certificate names.
+- compact certificate-gate failure records.
 
 ## Procedure
 
@@ -73,6 +75,7 @@ of generated runs.
 - `--check-files` is set and a referenced artifact is missing,
 - `--require-manifest` is set and `artifact_manifest.json` is missing,
 - the artifact manifest run id does not match the metrics run id.
+- certificate failure records are malformed.
 
 ## Reproducibility Notes
 

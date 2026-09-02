@@ -97,6 +97,14 @@ def build_evidence_run_summary(record: EvidenceRunRecord) -> dict[str, Any]:
     certificate_types = sorted(
         _non_empty_string_keys(by_certificate, "certificate_summary.by_certificate")
     )
+    summary_failures = _json_object_list(
+        _required_list(certificate_summary, "failures"),
+        "certificate_summary.failures",
+    )
+    gate_failures = _json_object_list(
+        _required_list(gate, "failures"),
+        "certificate_gate.failures",
+    )
 
     artifact_count: int | None = None
     if record.artifact_manifest is not None:
@@ -127,7 +135,8 @@ def build_evidence_run_summary(record: EvidenceRunRecord) -> dict[str, Any]:
         "certificate_types": certificate_types,
         "certificate_summary": {
             "all_certified": certificate_summary.get("all_certified") is True,
-            "failure_count": len(_required_list(certificate_summary, "failures")),
+            "failure_count": len(summary_failures),
+            "failures": summary_failures,
         },
         "certificate_gate": {
             "passed": gate.get("passed") is True,
@@ -135,7 +144,8 @@ def build_evidence_run_summary(record: EvidenceRunRecord) -> dict[str, Any]:
                 gate,
                 "required_certificates",
             ),
-            "failure_count": len(_required_list(gate, "failures")),
+            "failure_count": len(gate_failures),
+            "failures": gate_failures,
         },
     }
 
@@ -220,6 +230,12 @@ def _required_string_list(payload: dict[str, Any], key: str) -> list[str]:
     if not all(isinstance(item, str) and item for item in value):
         raise ValueError(f"{key} must contain only non-empty strings.")
     return cast(list[str], value)
+
+
+def _json_object_list(values: list[Any], location: str) -> list[dict[str, Any]]:
+    if not all(isinstance(value, dict) for value in values):
+        raise ValueError(f"{location} must contain only JSON objects.")
+    return [cast(dict[str, Any], dict(value)) for value in values]
 
 
 def _non_empty_string_keys(payload: dict[str, Any], location: str) -> list[str]:
