@@ -163,6 +163,8 @@ policy used by the smoke benchmark.
 See [docs/theory/assumptions.md](docs/theory/assumptions.md) for the theory
 assumptions and theorem documents introduced through Phase 8.
 See [docs/release_v0_1.md](docs/release_v0_1.md) for the v0.1 release checklist.
+See [docs/release_status_v0_1_alpha.md](docs/release_status_v0_1_alpha.md) for
+the current alpha release-readiness status and remaining owner decisions.
 
 ## Non-Goals for v0.1
 

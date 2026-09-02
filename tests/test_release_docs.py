@@ -9,6 +9,7 @@ def test_release_files_exist() -> None:
         "CITATION.cff",
         "LICENSE.md",
         "docs/release_v0_1.md",
+        "docs/release_status_v0_1_alpha.md",
     ):
         assert (ROOT / path).exists(), f"missing release file: {path}"
 
@@ -38,6 +39,7 @@ def test_readme_contains_release_setup_and_smoke_commands() -> None:
         "python scripts/check_certificates.py outputs/benchmark_smoke/metrics.json",
         "artifact_manifest.json",
         "docs/release_v0_1.md",
+        "docs/release_status_v0_1_alpha.md",
         "LICENSE.md",
         "No invented benchmark results",
     )
@@ -55,12 +57,29 @@ def test_outputs_are_ignored_except_gitkeep() -> None:
 def test_release_checklist_mentions_doc_link_verification() -> None:
     text = (ROOT / "docs/release_v0_1.md").read_text(encoding="utf-8")
 
+    assert "Confirm Phase 1 through Phase 31 are merged into `main`" in text
     assert "Confirm docs and README links resolve" in text
     assert "scripts/release_smoke.py --config configs/benchmark_smoke.yaml" in text
     assert "outputs/benchmark_smoke/artifact_manifest.json" in text
     assert "metrics schema validation" in text
     assert "artifact path validation" in text
     assert "certificate gate check" in text
+
+
+def test_release_status_tracks_remaining_owner_decisions() -> None:
+    text = (ROOT / "docs/release_status_v0_1_alpha.md").read_text(encoding="utf-8")
+
+    required = (
+        "Verified Technical Gates",
+        "Release Blockers",
+        "Choose the project license",
+        "CITATION.cff",
+        "CHANGELOG.md",
+        "v0.1.0-alpha",
+        "No benchmark numbers should be copied into release notes",
+    )
+    for needle in required:
+        assert needle in text
 
 
 def test_release_docs_do_not_embed_benchmark_results() -> None:
