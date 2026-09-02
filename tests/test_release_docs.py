@@ -46,7 +46,9 @@ def test_readme_contains_release_setup_and_smoke_commands() -> None:
         "python scripts/validate_metrics.py "
         "outputs/benchmark_smoke/metrics.json --check-files",
         "python scripts/check_certificates.py outputs/benchmark_smoke/metrics.json",
+        "python scripts/release_provenance.py --tag v0.1.0-alpha",
         "artifact_manifest.json",
+        "release_provenance.json",
         "docs/release_v0_1.md",
         "docs/release_status_v0_1_alpha.md",
         "LICENSE.md",
@@ -74,6 +76,7 @@ def test_release_checklist_mentions_doc_link_verification() -> None:
     assert "metrics schema validation" in text
     assert "artifact path validation" in text
     assert "certificate gate check" in text
+    assert "Confirm release provenance can link the tag" in text
     assert "TEMPORA v0.1-alpha uses the MIT License" in text
 
 
@@ -88,6 +91,8 @@ def test_release_status_tracks_resolved_release_decisions() -> None:
         "CITATION.cff",
         "CHANGELOG.md",
         "v0.1.0-alpha",
+        "release_provenance.json",
+        "release tag commit matches the `git_commit`",
         "No benchmark numbers should be copied into release notes",
     )
     for needle in required:
