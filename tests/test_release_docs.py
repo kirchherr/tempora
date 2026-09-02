@@ -47,6 +47,9 @@ def test_readme_contains_release_setup_and_smoke_commands() -> None:
         "outputs/benchmark_smoke/metrics.json --check-files",
         "python scripts/check_certificates.py outputs/benchmark_smoke/metrics.json",
         "python scripts/release_provenance.py --tag v0.1.0-alpha",
+        "python scripts/validate_evidence_index.py outputs/evidence_index.json "
+        "--require-gates-passed --require-manifests --require-git-commits "
+        "--check-files",
         "artifact_manifest.json",
         "release_provenance.json",
         "docs/release_v0_1.md",

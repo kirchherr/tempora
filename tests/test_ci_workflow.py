@@ -29,6 +29,9 @@ def test_ci_runs_standard_checks_and_smoke_benchmark() -> None:
         "python scripts/build_evidence_index.py "
         "outputs/benchmark_smoke/metrics.json --require-manifest --check-files",
         "test -f outputs/evidence_index.json",
+        "python scripts/validate_evidence_index.py outputs/evidence_index.json "
+        "--require-gates-passed --require-manifests --require-git-commits "
+        "--check-files",
     )
     for command in required_commands:
         assert command in workflow_text

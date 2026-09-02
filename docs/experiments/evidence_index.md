@@ -51,6 +51,12 @@ Then build an evidence index:
 python scripts/build_evidence_index.py outputs/benchmark_smoke/metrics.json --require-manifest --check-files
 ```
 
+Validate the generated evidence index for release review:
+
+```bash
+python scripts/validate_evidence_index.py outputs/evidence_index.json --require-gates-passed --require-manifests --require-git-commits --check-files
+```
+
 The command writes:
 
 ```text

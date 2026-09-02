@@ -109,6 +109,12 @@ Build a compact evidence index from generated benchmark metrics:
 docker compose run --rm tempora python scripts/build_evidence_index.py outputs/benchmark_smoke/metrics.json --require-manifest --check-files
 ```
 
+Validate the generated evidence index for release review:
+
+```bash
+docker compose run --rm tempora python scripts/validate_evidence_index.py outputs/evidence_index.json --require-gates-passed --require-manifests --require-git-commits --check-files
+```
+
 Generated metrics, reports, config snapshots, checkpoints, trajectory figures,
 and persistence figures are written under `outputs/` and are not committed.
 
