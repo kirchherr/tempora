@@ -20,6 +20,8 @@ capability.
 - [ ] Confirm `outputs/benchmark_smoke/metrics.json` exists after the smoke run.
 - [ ] Confirm `outputs/benchmark_smoke/config.yaml` exists after the smoke run.
 - [ ] Confirm `outputs/benchmark_smoke/report.md` exists after the smoke run.
+- [ ] Confirm `outputs/benchmark_smoke/artifact_manifest.json` exists after the
+  smoke run.
 - [ ] Confirm generated figures exist under `outputs/benchmark_smoke/figures/`.
 - [ ] Confirm trajectory and persistence figures exist for each benchmark dataset.
 - [ ] Confirm model checkpoints exist under `outputs/benchmark_smoke/checkpoints/`.

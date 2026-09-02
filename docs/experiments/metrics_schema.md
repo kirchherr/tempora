@@ -108,6 +108,8 @@ The default smoke config currently requires:
 A benchmark result should not be reported unless the corresponding
 `metrics.json`, `config.yaml`, generated figures, checkpoint artifacts, and
 `report.md` were produced by an actual run under `outputs/<run_id>/`.
+The release smoke command also writes `artifact_manifest.json` with file sizes
+and SHA256 checksums for these generated artifacts.
 
 For release review, regenerate the smoke benchmark and then validate the metrics
 schema before checking certificates:

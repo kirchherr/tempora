@@ -36,6 +36,7 @@ def test_readme_contains_release_setup_and_smoke_commands() -> None:
         "python scripts/validate_metrics.py "
         "outputs/benchmark_smoke/metrics.json --check-files",
         "python scripts/check_certificates.py outputs/benchmark_smoke/metrics.json",
+        "artifact_manifest.json",
         "docs/release_v0_1.md",
         "LICENSE.md",
         "No invented benchmark results",
@@ -56,6 +57,7 @@ def test_release_checklist_mentions_doc_link_verification() -> None:
 
     assert "Confirm docs and README links resolve" in text
     assert "scripts/release_smoke.py --config configs/benchmark_smoke.yaml" in text
+    assert "outputs/benchmark_smoke/artifact_manifest.json" in text
     assert "metrics schema validation" in text
     assert "artifact path validation" in text
     assert "certificate gate check" in text
