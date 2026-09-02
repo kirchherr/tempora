@@ -103,6 +103,18 @@ docker compose run --rm tempora python scripts/release_provenance.py --tag v0.1.
 
 This writes `release_provenance.json` for the audited smoke run.
 
+Build a compact evidence index from generated benchmark metrics:
+
+```bash
+docker compose run --rm tempora python scripts/build_evidence_index.py outputs/benchmark_smoke/metrics.json --require-manifest --check-files
+```
+
+Validate the generated evidence index for release review:
+
+```bash
+docker compose run --rm tempora python scripts/validate_evidence_index.py outputs/evidence_index.json --require-gates-passed --require-manifests --require-git-commits --check-files
+```
+
 Generated metrics, reports, config snapshots, checkpoints, trajectory figures,
 and persistence figures are written under `outputs/` and are not committed.
 
@@ -165,6 +177,8 @@ See [docs/experiments/baseline_comparison_protocol.md](docs/experiments/baseline
 for the baseline comparison smoke protocol introduced in Phase 6.
 See [docs/experiments/benchmark_spec.md](docs/experiments/benchmark_spec.md)
 for the synthetic smoke benchmark introduced in Phase 7.
+See [docs/experiments/evidence_index.md](docs/experiments/evidence_index.md) for
+the post-alpha evidence-index artifact.
 See [docs/experiments/metrics_schema.md](docs/experiments/metrics_schema.md)
 for the `metrics.json` schema, certificate-summary fields, and certificate-gate
 policy used by the smoke benchmark.

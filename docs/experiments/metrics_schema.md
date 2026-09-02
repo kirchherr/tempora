@@ -110,6 +110,11 @@ A benchmark result should not be reported unless the corresponding
 `report.md` were produced by an actual run under `outputs/<run_id>/`.
 The release smoke command also writes `artifact_manifest.json` with file sizes
 and SHA256 checksums for these generated artifacts.
+Generated runs can be summarized with `scripts/build_evidence_index.py` into
+`outputs/evidence_index.json` for compact review across one or more metrics
+files. Use `scripts/validate_evidence_index.py` to check that the generated
+index is internally consistent and, when requested, references manifests, git
+commits, existing files, and passing certificate gates.
 
 For release review, regenerate the smoke benchmark and then validate the metrics
 schema before checking certificates:
