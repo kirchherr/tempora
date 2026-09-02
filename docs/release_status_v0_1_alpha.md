@@ -29,6 +29,17 @@ figures, checkpoints, and `outputs/benchmark_smoke/artifact_manifest.json`.
 Generated files under `outputs/` remain uncommitted release artifacts except
 for `outputs/.gitkeep`.
 
+After tagging, release provenance can be audited with:
+
+```bash
+docker compose run --rm tempora python scripts/release_provenance.py --tag v0.1.0-alpha
+```
+
+This writes `outputs/benchmark_smoke/release_provenance.json` and verifies that
+the release tag commit matches the `git_commit` recorded in `metrics.json`, the
+artifact manifest belongs to the same run, and the stored certificate gate
+passed.
+
 ## Resolved Release Decisions
 
 The release decisions for `v0.1.0-alpha` are:

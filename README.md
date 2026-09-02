@@ -95,6 +95,14 @@ Check the mandatory certificate gate from saved benchmark metrics:
 docker compose run --rm tempora python scripts/check_certificates.py outputs/benchmark_smoke/metrics.json
 ```
 
+Audit release provenance for a tagged alpha source state:
+
+```bash
+docker compose run --rm tempora python scripts/release_provenance.py --tag v0.1.0-alpha
+```
+
+This writes `release_provenance.json` for the audited smoke run.
+
 Generated metrics, reports, config snapshots, checkpoints, trajectory figures,
 and persistence figures are written under `outputs/` and are not committed.
 
@@ -164,7 +172,7 @@ See [docs/theory/assumptions.md](docs/theory/assumptions.md) for the theory
 assumptions and theorem documents introduced through Phase 8.
 See [docs/release_v0_1.md](docs/release_v0_1.md) for the v0.1 release checklist.
 See [docs/release_status_v0_1_alpha.md](docs/release_status_v0_1_alpha.md) for
-the current alpha release-readiness status and remaining owner decisions.
+the current alpha release-readiness status and release provenance notes.
 
 ## Non-Goals for v0.1
 

@@ -26,6 +26,8 @@ capability.
 - [x] Confirm generated figures exist under `outputs/benchmark_smoke/figures/`.
 - [x] Confirm trajectory and persistence figures exist for each benchmark dataset.
 - [x] Confirm model checkpoints exist under `outputs/benchmark_smoke/checkpoints/`.
+- [x] Confirm release provenance can link the tag, metrics, artifact manifest,
+  and certificate gate.
 - [x] Confirm generated outputs are not staged for commit.
 - [x] Confirm docs and README links resolve.
 - [x] Confirm GitHub Actions CI includes tests, linting, typing, the release
