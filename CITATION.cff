@@ -2,6 +2,7 @@ cff-version: 1.2.0
 message: "If you use TEMPORA, please cite the project repository and release you used."
 title: "TEMPORA: Temporale Emergenz und mathematische Beweisbarkeit selbstorganisierender neuronaler Systeme"
 version: "0.1.0-alpha"
+date-released: "2026-09-02"
 authors:
   - name: "TEMPORA Contributors"
 repository-code: "https://github.com/kirchherr/tempora"

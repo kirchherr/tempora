@@ -15,15 +15,24 @@ def test_release_files_exist() -> None:
 
 
 def test_release_version_metadata_is_aligned() -> None:
-    assert 'version = "0.1.0a0"' in (ROOT / "pyproject.toml").read_text(
-        encoding="utf-8"
-    )
+    pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    citation = (ROOT / "CITATION.cff").read_text(encoding="utf-8")
+
+    assert 'version = "0.1.0a0"' in pyproject
+    assert 'license = { text = "MIT" }' in pyproject
     assert '__version__ = "0.1.0a0"' in (ROOT / "src/tempora/__init__.py").read_text(
         encoding="utf-8"
     )
-    assert 'version: "0.1.0-alpha"' in (ROOT / "CITATION.cff").read_text(
-        encoding="utf-8"
-    )
+    assert 'version: "0.1.0-alpha"' in citation
+    assert 'date-released: "2026-09-02"' in citation
+
+
+def test_license_file_contains_mit_release_license() -> None:
+    text = (ROOT / "LICENSE.md").read_text(encoding="utf-8")
+
+    assert text.startswith("MIT License")
+    assert "Copyright (c) 2026 TEMPORA Contributors" in text
+    assert "License Pending" not in text
 
 
 def test_readme_contains_release_setup_and_smoke_commands() -> None:
@@ -41,6 +50,7 @@ def test_readme_contains_release_setup_and_smoke_commands() -> None:
         "docs/release_v0_1.md",
         "docs/release_status_v0_1_alpha.md",
         "LICENSE.md",
+        "MIT License",
         "No invented benchmark results",
     )
     for needle in required:
@@ -57,22 +67,24 @@ def test_outputs_are_ignored_except_gitkeep() -> None:
 def test_release_checklist_mentions_doc_link_verification() -> None:
     text = (ROOT / "docs/release_v0_1.md").read_text(encoding="utf-8")
 
-    assert "Confirm Phase 1 through Phase 31 are merged into `main`" in text
+    assert "Confirm Phase 1 through Phase 32 release-readiness work" in text
     assert "Confirm docs and README links resolve" in text
     assert "scripts/release_smoke.py --config configs/benchmark_smoke.yaml" in text
     assert "outputs/benchmark_smoke/artifact_manifest.json" in text
     assert "metrics schema validation" in text
     assert "artifact path validation" in text
     assert "certificate gate check" in text
+    assert "TEMPORA v0.1-alpha uses the MIT License" in text
 
 
-def test_release_status_tracks_remaining_owner_decisions() -> None:
+def test_release_status_tracks_resolved_release_decisions() -> None:
     text = (ROOT / "docs/release_status_v0_1_alpha.md").read_text(encoding="utf-8")
 
     required = (
-        "Verified Technical Gates",
-        "Release Blockers",
-        "Choose the project license",
+        "Technical Gates",
+        "Resolved Release Decisions",
+        "License: MIT",
+        "Citation release date: `2026-09-02`",
         "CITATION.cff",
         "CHANGELOG.md",
         "v0.1.0-alpha",

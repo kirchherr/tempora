@@ -12,7 +12,8 @@ capability.
 
 ## Required Checks
 
-- [x] Confirm Phase 1 through Phase 31 are merged into `main`.
+- [x] Confirm Phase 1 through Phase 32 release-readiness work is merged into the
+  final source state.
 - [x] Merge reviewed branches in order.
 - [x] Run `docker compose build tempora`.
 - [x] Run `docker compose run --rm tempora`.
@@ -39,25 +40,25 @@ current release-readiness summary and remaining owner decisions.
 
 ## License Decision
 
-- [ ] Choose a project license.
-- [ ] Replace `LICENSE.md` placeholder with the selected license text.
-- [ ] Update `pyproject.toml` license metadata.
+- [x] Choose the project license.
+- [x] Replace `LICENSE.md` placeholder with the selected license text.
+- [x] Update `pyproject.toml` license metadata.
 
-This remains the main release blocker. Until the project owner chooses a
-license, the repository keeps the explicit `License Pending` placeholder and
-`LicenseRef-Proprietary` metadata.
+TEMPORA v0.1-alpha uses the MIT License. The license text is stored in
+`LICENSE.md`, and package metadata uses the `MIT` SPDX identifier.
 
 ## Citation
 
 - [x] Review `CITATION.cff` structure.
-- [ ] Replace placeholder author metadata if needed before public release.
-- [ ] Update version/date fields when tagging an actual release.
+- [x] Keep project-level `TEMPORA Contributors` author metadata without
+  inferring person-specific author details.
+- [x] Update version/date fields for the alpha release.
 
 ## Release Notes
 
-- [ ] Update `CHANGELOG.md` from `0.1.0-alpha - Unreleased` to the release tag.
-- [ ] Include only results that were generated and reviewed.
-- [ ] Include known limitations and open questions.
+- [x] Update `CHANGELOG.md` from `0.1.0-alpha - Unreleased` to the release tag.
+- [x] Include only results that were generated and reviewed.
+- [x] Include known limitations and open questions.
 
-Do not tag the release until the license, citation metadata, changelog header,
-and final post-decision release gates are complete.
+The release tag should point to the final source state after post-decision
+release gates pass.

@@ -12,10 +12,10 @@ TEMPORA still does not claim general temporal semantic preservation, arbitrary
 homeomorphism preservation, real-world video understanding, or AGI-like
 capability.
 
-## Verified Technical Gates
+## Technical Gates
 
-The technical release path is ready for final owner review when these local
-gates pass:
+The technical release path is ready for an alpha tag when these local gates
+pass on the final source state:
 
 - `docker compose build tempora`
 - `docker compose run --rm tempora`
@@ -29,22 +29,24 @@ figures, checkpoints, and `outputs/benchmark_smoke/artifact_manifest.json`.
 Generated files under `outputs/` remain uncommitted release artifacts except
 for `outputs/.gitkeep`.
 
-## Release Blockers
+## Resolved Release Decisions
 
-These items require project-owner decisions before a public tag:
+The release decisions for `v0.1.0-alpha` are:
 
-- Choose the project license.
-- Replace `LICENSE.md` with the selected license text.
-- Update `pyproject.toml` license metadata.
-- Review and replace placeholder author metadata in `CITATION.cff` if needed.
-- Update citation version and date fields when the release tag is chosen.
-- Change `CHANGELOG.md` from `0.1.0-alpha - Unreleased` to the final tag.
-- Rerun the technical gates after those decisions.
+- License: MIT.
+- License text: `LICENSE.md`.
+- Package license metadata: `MIT`.
+- Citation file: `CITATION.cff`.
+- Citation version: `0.1.0-alpha`.
+- Citation release date: `2026-09-02`.
+- Citation author metadata: project-level `TEMPORA Contributors`.
+- Changelog file: `CHANGELOG.md`.
+- Changelog release header: `0.1.0-alpha - 2026-09-02`.
 
 ## Tagging Criteria
 
-The `v0.1.0-alpha` tag should be created only after the release blockers are
-resolved and the technical gates pass on the final tagged source state.
+The `v0.1.0-alpha` tag should be created only after the technical gates pass on
+the final source state.
 
 No benchmark numbers should be copied into release notes unless they come from
 a reviewed run with its config, seed, metrics file, report, and artifact

@@ -15,7 +15,7 @@ capability.
 
 ## Repository Status
 
-This repository currently contains the `0.1.0-alpha` release-prep scope:
+This repository currently contains the `0.1.0-alpha` release scope:
 
 - Python package with `src/` layout
 - pytest, ruff, and mypy configuration
@@ -32,7 +32,7 @@ This repository currently contains the `0.1.0-alpha` release-prep scope:
 - GRU, unconstrained Neural ODE, and reservoir baselines
 - CI-small synthetic smoke benchmark with metrics, figures, and report
 
-Final release tagging and license selection are intentionally pending.
+The alpha source release is licensed under the MIT License.
 
 ## Local Setup
 
@@ -177,5 +177,5 @@ the current alpha release-readiness status and remaining owner decisions.
 
 ## Release Status
 
-TEMPORA is currently `0.1.0-alpha` release-prep software. The license is pending
-project-owner selection; see [LICENSE.md](LICENSE.md).
+TEMPORA is currently `0.1.0-alpha` software under the MIT License; see
+[LICENSE.md](LICENSE.md).
