@@ -92,6 +92,8 @@ attention.
 
 See [metrics_schema.md](metrics_schema.md) for the expected `metrics.json`
 field layout, certificate payload structure, and gate semantics.
+See [evidence_index.md](evidence_index.md) for indexing one or more generated
+benchmark runs into a compact review artifact.
 
 ## Expected Failure Modes
 
