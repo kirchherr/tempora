@@ -128,6 +128,12 @@ Validate that the Markdown evidence report matches the current evidence index:
 docker compose run --rm tempora python scripts/validate_evidence_report.py outputs/evidence_index.json outputs/evidence_report.md
 ```
 
+Build a checksum manifest for the evidence index and report:
+
+```bash
+docker compose run --rm tempora python scripts/build_evidence_bundle.py --index outputs/evidence_index.json --report outputs/evidence_report.md
+```
+
 Generated metrics, reports, config snapshots, checkpoints, trajectory figures,
 and persistence figures are written under `outputs/` and are not committed.
 

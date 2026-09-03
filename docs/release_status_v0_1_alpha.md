@@ -25,6 +25,9 @@ The full Docker gate runs pytest, Ruff, Ruff format checking, and Mypy. The
 release smoke command regenerates `outputs/benchmark_smoke/metrics.json`,
 `outputs/benchmark_smoke/config.yaml`, `outputs/benchmark_smoke/report.md`,
 figures, checkpoints, and `outputs/benchmark_smoke/artifact_manifest.json`.
+The evidence-review commands can then build and validate
+`outputs/evidence_index.json`, `outputs/evidence_report.md`, and
+`outputs/evidence_bundle.json`.
 
 Generated files under `outputs/` remain uncommitted release artifacts except
 for `outputs/.gitkeep`.
@@ -61,4 +64,5 @@ the final source state.
 
 No benchmark numbers should be copied into release notes unless they come from
 a reviewed run with its config, seed, metrics file, report, and artifact
-manifest.
+manifest. Evidence bundle hashes are review aids for generated artifacts, not
+new research claims.

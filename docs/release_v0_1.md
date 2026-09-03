@@ -31,8 +31,9 @@ capability.
 - [x] Confirm generated outputs are not staged for commit.
 - [x] Confirm docs and README links resolve.
 - [x] Confirm GitHub Actions CI includes tests, linting, typing, the release
-  smoke command, metrics schema validation, artifact path validation, and
-  certificate gate check.
+  smoke command, metrics schema validation, artifact path validation,
+  certificate gate check, evidence index validation, evidence report validation,
+  and evidence bundle manifest generation.
 - [x] Confirm theory documents include assumptions, limitations, and related
   tests.
 - [x] Confirm no invented benchmark results are added to docs or changelog.

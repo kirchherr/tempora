@@ -71,11 +71,18 @@ Validate that the report still matches the index:
 python scripts/validate_evidence_report.py outputs/evidence_index.json outputs/evidence_report.md
 ```
 
+Build a checksum manifest for the index and report:
+
+```bash
+python scripts/build_evidence_bundle.py --index outputs/evidence_index.json --report outputs/evidence_report.md
+```
+
 The index and report commands write:
 
 ```text
 outputs/evidence_index.json
 outputs/evidence_report.md
+outputs/evidence_bundle.json
 ```
 
 Multiple metrics files can be passed to the same command when reviewing a set
@@ -89,8 +96,9 @@ of generated runs.
 - `--require-manifest` is set and `artifact_manifest.json` is missing,
 - the artifact manifest run id does not match the metrics run id,
 - certificate failure records are malformed,
-- report rendering fails when the evidence index is invalid.
-- report validation fails when the saved report is stale.
+- report rendering fails when the evidence index is invalid,
+- report validation fails when the saved report is stale,
+- bundle manifest generation fails when the report and index do not match.
 
 ## Reproducibility Notes
 
