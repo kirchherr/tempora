@@ -31,6 +31,7 @@ This repository currently contains the `0.1.0-alpha` release scope:
 - stability and invariance diagnostics for synthetic trajectories
 - GRU, unconstrained Neural ODE, and reservoir baselines
 - CI-small synthetic smoke benchmark with metrics, figures, and report
+- review-oriented evidence index and Markdown evidence report
 
 The alpha source release is licensed under the MIT License.
 
@@ -113,6 +114,12 @@ Validate the generated evidence index for release review:
 
 ```bash
 docker compose run --rm tempora python scripts/validate_evidence_index.py outputs/evidence_index.json --require-gates-passed --require-manifests --require-git-commits --check-files
+```
+
+Render a Markdown evidence report for review:
+
+```bash
+docker compose run --rm tempora python scripts/render_evidence_report.py outputs/evidence_index.json
 ```
 
 Generated metrics, reports, config snapshots, checkpoints, trajectory figures,
