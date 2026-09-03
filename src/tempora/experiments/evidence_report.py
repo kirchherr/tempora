@@ -63,6 +63,20 @@ def render_evidence_report(index: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def expected_evidence_report_text(index: dict[str, Any]) -> str:
+    """Return the exact on-disk Markdown text expected for an evidence index."""
+
+    return render_evidence_report(index).rstrip() + "\n"
+
+
+def validate_evidence_report(report: str, index: dict[str, Any]) -> None:
+    """Validate that a Markdown evidence report matches its evidence index."""
+
+    expected = expected_evidence_report_text(index)
+    if report != expected:
+        raise ValueError("evidence report does not match the evidence index.")
+
+
 def write_evidence_report(report: str, path: Path) -> Path:
     """Write a Markdown evidence report artifact."""
 

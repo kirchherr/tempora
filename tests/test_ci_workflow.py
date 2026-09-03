@@ -34,6 +34,8 @@ def test_ci_runs_standard_checks_and_smoke_benchmark() -> None:
         "--check-files",
         "python scripts/render_evidence_report.py outputs/evidence_index.json",
         "test -f outputs/evidence_report.md",
+        "python scripts/validate_evidence_report.py "
+        "outputs/evidence_index.json outputs/evidence_report.md",
     )
     for command in required_commands:
         assert command in workflow_text

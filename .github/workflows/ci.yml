@@ -50,3 +50,4 @@ jobs:
           python scripts/validate_evidence_index.py outputs/evidence_index.json --require-gates-passed --require-manifests --require-git-commits --check-files
           python scripts/render_evidence_report.py outputs/evidence_index.json
           test -f outputs/evidence_report.md
+          python scripts/validate_evidence_report.py outputs/evidence_index.json outputs/evidence_report.md

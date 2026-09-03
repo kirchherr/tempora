@@ -15,7 +15,9 @@ from tempora.experiments.evidence_index import (
     write_evidence_index,
 )
 from tempora.experiments.evidence_report import (
+    expected_evidence_report_text,
     render_evidence_report,
+    validate_evidence_report,
     write_evidence_report,
 )
 from tempora.experiments.run_synthetic import (
@@ -36,11 +38,13 @@ __all__ = [
     "default_baselines",
     "evaluate_dataset_stability",
     "evaluate_topology_pair",
+    "expected_evidence_report_text",
     "load_artifact_manifest_for_metrics",
     "load_benchmark_config",
     "render_evidence_report",
     "run_synthetic_benchmark",
     "run_stability_evaluation",
+    "validate_evidence_report",
     "write_evidence_index",
     "write_evidence_report",
 ]

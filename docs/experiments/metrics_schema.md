@@ -117,7 +117,9 @@ index is internally consistent and, when requested, references manifests, git
 commits, existing files, and passing certificate gates.
 The index preserves compact certificate-summary and certificate-gate failure
 records so optional review failures remain visible even when the required gate
-passes.
+passes. Use `scripts/render_evidence_report.py` to create a Markdown report
+from the index and `scripts/validate_evidence_report.py` to check that the saved
+report still matches the current index.
 
 For release review, regenerate the smoke benchmark and then validate the metrics
 schema before checking certificates:

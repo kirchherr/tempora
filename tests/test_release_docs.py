@@ -51,6 +51,8 @@ def test_readme_contains_release_setup_and_smoke_commands() -> None:
         "--require-gates-passed --require-manifests --require-git-commits "
         "--check-files",
         "python scripts/render_evidence_report.py outputs/evidence_index.json",
+        "python scripts/validate_evidence_report.py "
+        "outputs/evidence_index.json outputs/evidence_report.md",
         "artifact_manifest.json",
         "release_provenance.json",
         "docs/release_v0_1.md",

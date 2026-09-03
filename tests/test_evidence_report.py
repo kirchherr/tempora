@@ -8,7 +8,9 @@ from typing import Any
 import pytest
 
 from tempora.experiments.evidence_report import (
+    expected_evidence_report_text,
     render_evidence_report,
+    validate_evidence_report,
     write_evidence_report,
 )
 
@@ -56,6 +58,20 @@ def test_write_evidence_report_writes_markdown(tmp_path: Path) -> None:
 
     assert completed == output_path
     assert output_path.read_text(encoding="utf-8") == "report\n"
+
+
+def test_validate_evidence_report_accepts_expected_text() -> None:
+    index = _valid_index()
+
+    validate_evidence_report(expected_evidence_report_text(index), index)
+
+
+def test_validate_evidence_report_rejects_stale_text() -> None:
+    index = _valid_index()
+    report = expected_evidence_report_text(index).replace("- runs: 1", "- runs: 2")
+
+    with pytest.raises(ValueError, match="does not match"):
+        validate_evidence_report(report, index)
 
 
 def test_render_evidence_report_cli_writes_report(tmp_path: Path) -> None:

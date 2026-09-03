@@ -122,6 +122,12 @@ Render a Markdown evidence report for review:
 docker compose run --rm tempora python scripts/render_evidence_report.py outputs/evidence_index.json
 ```
 
+Validate that the Markdown evidence report matches the current evidence index:
+
+```bash
+docker compose run --rm tempora python scripts/validate_evidence_report.py outputs/evidence_index.json outputs/evidence_report.md
+```
+
 Generated metrics, reports, config snapshots, checkpoints, trajectory figures,
 and persistence figures are written under `outputs/` and are not committed.
 

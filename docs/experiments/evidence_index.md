@@ -65,6 +65,12 @@ Render a Markdown evidence report for review:
 python scripts/render_evidence_report.py outputs/evidence_index.json
 ```
 
+Validate that the report still matches the index:
+
+```bash
+python scripts/validate_evidence_report.py outputs/evidence_index.json outputs/evidence_report.md
+```
+
 The index and report commands write:
 
 ```text
@@ -84,6 +90,7 @@ of generated runs.
 - the artifact manifest run id does not match the metrics run id,
 - certificate failure records are malformed,
 - report rendering fails when the evidence index is invalid.
+- report validation fails when the saved report is stale.
 
 ## Reproducibility Notes
 
