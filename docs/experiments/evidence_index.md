@@ -35,7 +35,9 @@ The index records:
 - optional artifact manifest path and artifact count,
 - certificate types,
 - certificate-summary failure count,
-- certificate-gate status and required certificate names.
+- compact certificate-summary failure records,
+- certificate-gate status and required certificate names,
+- compact certificate-gate failure records.
 
 ## Procedure
 
@@ -57,10 +59,17 @@ Validate the generated evidence index for release review:
 python scripts/validate_evidence_index.py outputs/evidence_index.json --require-gates-passed --require-manifests --require-git-commits --check-files
 ```
 
-The command writes:
+Render a Markdown evidence report for review:
+
+```bash
+python scripts/render_evidence_report.py outputs/evidence_index.json
+```
+
+The index and report commands write:
 
 ```text
 outputs/evidence_index.json
+outputs/evidence_report.md
 ```
 
 Multiple metrics files can be passed to the same command when reviewing a set
@@ -72,7 +81,9 @@ of generated runs.
 - a metrics payload fails schema validation,
 - `--check-files` is set and a referenced artifact is missing,
 - `--require-manifest` is set and `artifact_manifest.json` is missing,
-- the artifact manifest run id does not match the metrics run id.
+- the artifact manifest run id does not match the metrics run id,
+- certificate failure records are malformed,
+- report rendering fails when the evidence index is invalid.
 
 ## Reproducibility Notes
 
