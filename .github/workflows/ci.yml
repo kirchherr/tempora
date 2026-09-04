@@ -40,17 +40,11 @@ jobs:
 
       - name: Run synthetic smoke benchmark
         run: |
-          python scripts/release_smoke.py --config configs/benchmark_smoke.yaml
+          python scripts/release_evidence.py --config configs/benchmark_smoke.yaml
           test -f outputs/benchmark_smoke/config.yaml
           test -f outputs/benchmark_smoke/metrics.json
           test -f outputs/benchmark_smoke/report.md
           test -f outputs/benchmark_smoke/artifact_manifest.json
-          python scripts/build_evidence_index.py outputs/benchmark_smoke/metrics.json --require-manifest --check-files
           test -f outputs/evidence_index.json
-          python scripts/validate_evidence_index.py outputs/evidence_index.json --require-gates-passed --require-manifests --require-git-commits --check-files
-          python scripts/render_evidence_report.py outputs/evidence_index.json
           test -f outputs/evidence_report.md
-          python scripts/validate_evidence_report.py outputs/evidence_index.json outputs/evidence_report.md
-          python scripts/build_evidence_bundle.py --index outputs/evidence_index.json --report outputs/evidence_report.md
           test -f outputs/evidence_bundle.json
-          python scripts/validate_evidence_bundle.py outputs/evidence_bundle.json

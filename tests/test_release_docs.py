@@ -41,6 +41,7 @@ def test_readme_contains_release_setup_and_smoke_commands() -> None:
     required = (
         "python -m pip install -r requirements/docker-cpu.txt",
         "docker compose run --rm tempora",
+        "python scripts/release_evidence.py --config configs/benchmark_smoke.yaml",
         "python scripts/release_smoke.py --config configs/benchmark_smoke.yaml",
         "python scripts/train_synth.py --config configs/benchmark_smoke.yaml",
         "python scripts/validate_metrics.py "
@@ -77,14 +78,16 @@ def test_outputs_are_ignored_except_gitkeep() -> None:
 
 def test_release_checklist_mentions_doc_link_verification() -> None:
     text = (ROOT / "docs/release_v0_1.md").read_text(encoding="utf-8")
+    normalized_text = " ".join(text.split())
 
     assert "Confirm Phase 1 through Phase 32 release-readiness work" in text
     assert "Confirm docs and README links resolve" in text
+    assert "scripts/release_evidence.py --config configs/benchmark_smoke.yaml" in text
     assert "scripts/release_smoke.py --config configs/benchmark_smoke.yaml" in text
     assert "outputs/benchmark_smoke/artifact_manifest.json" in text
-    assert "metrics schema validation" in text
-    assert "artifact path validation" in text
-    assert "certificate gate check" in text
+    assert "metrics schema validation" in normalized_text
+    assert "artifact path validation" in normalized_text
+    assert "certificate gate check" in normalized_text
     assert "Confirm release provenance can link the tag" in text
     assert "TEMPORA v0.1-alpha uses the MIT License" in text
 
@@ -95,6 +98,7 @@ def test_release_status_tracks_resolved_release_decisions() -> None:
     required = (
         "Technical Gates",
         "Resolved Release Decisions",
+        "scripts/release_evidence.py --config configs/benchmark_smoke.yaml",
         "License: MIT",
         "Citation release date: `2026-09-02`",
         "CITATION.cff",

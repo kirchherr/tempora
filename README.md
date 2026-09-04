@@ -31,7 +31,7 @@ This repository currently contains the `0.1.0-alpha` release scope:
 - stability and invariance diagnostics for synthetic trajectories
 - GRU, unconstrained Neural ODE, and reservoir baselines
 - CI-small synthetic smoke benchmark with metrics, figures, and report
-- review-oriented evidence index and Markdown evidence report
+- review-oriented evidence index, Markdown evidence report, and evidence bundle
 
 The alpha source release is licensed under the MIT License.
 
@@ -59,7 +59,17 @@ Run the full check suite in Docker:
 docker compose run --rm tempora
 ```
 
-Run the complete release smoke path:
+Run the complete release evidence path:
+
+```bash
+docker compose run --rm tempora python scripts/release_evidence.py --config configs/benchmark_smoke.yaml
+```
+
+This runs the smoke benchmark, writes `artifact_manifest.json`, builds and
+validates `evidence_index.json`, renders and validates `evidence_report.md`,
+and builds and validates `evidence_bundle.json`.
+
+Run only the release smoke path:
 
 ```bash
 docker compose run --rm tempora python scripts/release_smoke.py --config configs/benchmark_smoke.yaml

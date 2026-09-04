@@ -17,6 +17,7 @@ capability.
 - [x] Merge reviewed branches in order.
 - [x] Run `docker compose build tempora`.
 - [x] Run `docker compose run --rm tempora`.
+- [x] Run `docker compose run --rm tempora python scripts/release_evidence.py --config configs/benchmark_smoke.yaml`.
 - [x] Run `docker compose run --rm tempora python scripts/release_smoke.py --config configs/benchmark_smoke.yaml`.
 - [x] Confirm `outputs/benchmark_smoke/metrics.json` exists after the smoke run.
 - [x] Confirm `outputs/benchmark_smoke/config.yaml` exists after the smoke run.
@@ -31,9 +32,10 @@ capability.
 - [x] Confirm generated outputs are not staged for commit.
 - [x] Confirm docs and README links resolve.
 - [x] Confirm GitHub Actions CI includes tests, linting, typing, the release
-  smoke command, metrics schema validation, artifact path validation,
-  certificate gate check, evidence index validation, evidence report validation,
-  evidence bundle manifest generation, and evidence bundle validation.
+  evidence runner, smoke command, metrics schema validation, artifact path
+  validation, certificate gate check, evidence index validation, evidence report
+  validation, evidence bundle manifest generation, and evidence bundle
+  validation.
 - [x] Confirm theory documents include assumptions, limitations, and related
   tests.
 - [x] Confirm no invented benchmark results are added to docs or changelog.

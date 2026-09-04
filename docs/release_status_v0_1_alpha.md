@@ -19,16 +19,18 @@ pass on the final source state:
 
 - `docker compose build tempora`
 - `docker compose run --rm tempora`
+- `docker compose run --rm tempora python scripts/release_evidence.py --config configs/benchmark_smoke.yaml`
 - `docker compose run --rm tempora python scripts/release_smoke.py --config configs/benchmark_smoke.yaml`
 
 The full Docker gate runs pytest, Ruff, Ruff format checking, and Mypy. The
 release smoke command regenerates `outputs/benchmark_smoke/metrics.json`,
 `outputs/benchmark_smoke/config.yaml`, `outputs/benchmark_smoke/report.md`,
 figures, checkpoints, and `outputs/benchmark_smoke/artifact_manifest.json`.
-The evidence-review commands can then build and validate
+The release evidence command runs the smoke path and then builds and validates
 `outputs/evidence_index.json`, `outputs/evidence_report.md`, and
 `outputs/evidence_bundle.json`, including freshness checks between the bundle,
-index, and report.
+index, and report. The lower-level evidence-review commands remain available
+for manual audits.
 
 Generated files under `outputs/` remain uncommitted release artifacts except
 for `outputs/.gitkeep`.

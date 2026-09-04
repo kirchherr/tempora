@@ -41,7 +41,17 @@ The index records:
 
 ## Procedure
 
-First generate a benchmark run:
+Run the complete release evidence path:
+
+```bash
+python scripts/release_evidence.py --config configs/benchmark_smoke.yaml
+```
+
+This command executes the CI-small smoke benchmark, writes the benchmark
+artifact manifest, builds and validates the evidence index, renders and
+validates the Markdown report, and builds and validates the evidence bundle.
+
+For manual audits, first generate a benchmark run:
 
 ```bash
 python scripts/release_smoke.py --config configs/benchmark_smoke.yaml
@@ -105,7 +115,9 @@ of generated runs.
 - report rendering fails when the evidence index is invalid,
 - report validation fails when the saved report is stale,
 - bundle manifest generation fails when the report and index do not match,
-- bundle validation fails when indexed artifact hashes are stale.
+- bundle validation fails when indexed artifact hashes are stale,
+- the release evidence runner fails if any upstream benchmark, index, report, or
+  bundle gate fails.
 
 ## Reproducibility Notes
 

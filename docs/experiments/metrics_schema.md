@@ -122,7 +122,9 @@ from the index and `scripts/validate_evidence_report.py` to check that the saved
 report still matches the current index. Use `scripts/build_evidence_bundle.py`
 to record SHA256 digests and file sizes for the index and report. Use
 `scripts/validate_evidence_bundle.py` to check those digest records against
-local evidence artifacts.
+local evidence artifacts. Use `scripts/release_evidence.py` to run the
+CI-small benchmark, index, report, bundle, and all release evidence validators
+as one command.
 
 For release review, regenerate the smoke benchmark and then validate the metrics
 schema before checking certificates:
