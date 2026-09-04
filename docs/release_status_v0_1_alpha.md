@@ -27,7 +27,8 @@ release smoke command regenerates `outputs/benchmark_smoke/metrics.json`,
 figures, checkpoints, and `outputs/benchmark_smoke/artifact_manifest.json`.
 The evidence-review commands can then build and validate
 `outputs/evidence_index.json`, `outputs/evidence_report.md`, and
-`outputs/evidence_bundle.json`.
+`outputs/evidence_bundle.json`, including freshness checks between the bundle,
+index, and report.
 
 Generated files under `outputs/` remain uncommitted release artifacts except
 for `outputs/.gitkeep`.

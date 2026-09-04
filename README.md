@@ -134,6 +134,12 @@ Build a checksum manifest for the evidence index and report:
 docker compose run --rm tempora python scripts/build_evidence_bundle.py --index outputs/evidence_index.json --report outputs/evidence_report.md
 ```
 
+Validate that the evidence bundle still matches local evidence artifacts:
+
+```bash
+docker compose run --rm tempora python scripts/validate_evidence_bundle.py outputs/evidence_bundle.json
+```
+
 Generated metrics, reports, config snapshots, checkpoints, trajectory figures,
 and persistence figures are written under `outputs/` and are not committed.
 

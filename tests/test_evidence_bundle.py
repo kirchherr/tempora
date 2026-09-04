@@ -9,6 +9,7 @@ import pytest
 
 from tempora.experiments.evidence_bundle import (
     build_evidence_bundle_manifest,
+    validate_evidence_bundle_artifacts,
     validate_evidence_bundle_files,
     validate_evidence_bundle_manifest,
     write_evidence_bundle_manifest,
@@ -38,6 +39,7 @@ def test_build_evidence_bundle_manifest_records_report_hashes(tmp_path: Path) ->
     assert len(manifest["evidence_report"]["sha256"]) == 64
     validate_evidence_bundle_manifest(manifest)
     validate_evidence_bundle_files(manifest, base_dir=tmp_path)
+    validate_evidence_bundle_artifacts(manifest, base_dir=tmp_path)
 
 
 def test_build_evidence_bundle_manifest_rejects_stale_report(tmp_path: Path) -> None:
@@ -66,6 +68,21 @@ def test_validate_evidence_bundle_files_rejects_hash_mismatch(tmp_path: Path) ->
 
     with pytest.raises(ValueError, match="byte count|sha256"):
         validate_evidence_bundle_files(manifest, base_dir=tmp_path)
+
+
+def test_validate_evidence_bundle_artifacts_rejects_summary_mismatch(
+    tmp_path: Path,
+) -> None:
+    index_path, report_path = _write_evidence_pair(tmp_path)
+    manifest = build_evidence_bundle_manifest(
+        index_path.relative_to(tmp_path),
+        report_path.relative_to(tmp_path),
+        base_dir=tmp_path,
+    )
+    manifest["run_ids"] = ["other"]
+
+    with pytest.raises(ValueError, match="run_ids"):
+        validate_evidence_bundle_artifacts(manifest, base_dir=tmp_path)
 
 
 def test_write_evidence_bundle_manifest_writes_sorted_json(tmp_path: Path) -> None:

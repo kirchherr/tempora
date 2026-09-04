@@ -81,6 +81,31 @@ def validate_evidence_bundle_files(
         _validate_file_record_matches(record, base_dir=base_dir)
 
 
+def validate_evidence_bundle_artifacts(
+    manifest: dict[str, Any],
+    *,
+    base_dir: Path,
+) -> None:
+    """Validate a bundle manifest against local index and report artifacts."""
+
+    validate_evidence_bundle_files(manifest, base_dir=base_dir)
+    index_record = _required_mapping(manifest, "evidence_index")
+    report_record = _required_mapping(manifest, "evidence_report")
+    index_path = _resolve_path(
+        Path(_required_string(index_record, "path")),
+        base_dir=base_dir,
+    )
+    report_path = _resolve_path(
+        Path(_required_string(report_record, "path")),
+        base_dir=base_dir,
+    )
+    index = load_json_object(index_path)
+    report = report_path.read_text(encoding="utf-8")
+    validate_evidence_index(index)
+    validate_evidence_report(report, index)
+    _validate_bundle_summary_matches_index(manifest, index)
+
+
 def write_evidence_bundle_manifest(manifest: dict[str, Any], path: Path) -> Path:
     """Write an evidence bundle manifest JSON artifact."""
 
@@ -121,6 +146,25 @@ def _validate_file_record_matches(
     expected_sha256 = _required_string(record, "sha256")
     if _sha256_file(resolved_path) != expected_sha256:
         raise ValueError(f"{display_path} sha256 does not match manifest.")
+
+
+def _validate_bundle_summary_matches_index(
+    manifest: dict[str, Any],
+    index: dict[str, Any],
+) -> None:
+    runs = [_ensure_mapping(run, "runs[]") for run in _required_list(index, "runs")]
+    expected = {
+        "run_count": _required_int(index, "run_count"),
+        "dataset_count": _required_int(index, "dataset_count"),
+        "git_commits": _string_list(index, "git_commits"),
+        "all_certificate_gates_passed": (
+            index.get("all_certificate_gates_passed") is True
+        ),
+        "run_ids": [_required_string(run, "run_id") for run in runs],
+    }
+    for key, expected_value in expected.items():
+        if manifest.get(key) != expected_value:
+            raise ValueError(f"evidence bundle {key} does not match evidence index.")
 
 
 def _sha256_file(path: Path) -> str:

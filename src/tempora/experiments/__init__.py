@@ -9,6 +9,7 @@ from tempora.experiments.evaluate_stability import (
 from tempora.experiments.evaluate_topology import evaluate_topology_pair
 from tempora.experiments.evidence_bundle import (
     build_evidence_bundle_manifest,
+    validate_evidence_bundle_artifacts,
     validate_evidence_bundle_files,
     validate_evidence_bundle_manifest,
     write_evidence_bundle_manifest,
@@ -51,6 +52,7 @@ __all__ = [
     "render_evidence_report",
     "run_synthetic_benchmark",
     "run_stability_evaluation",
+    "validate_evidence_bundle_artifacts",
     "validate_evidence_bundle_files",
     "validate_evidence_bundle_manifest",
     "validate_evidence_report",

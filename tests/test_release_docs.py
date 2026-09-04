@@ -55,6 +55,7 @@ def test_readme_contains_release_setup_and_smoke_commands() -> None:
         "outputs/evidence_index.json outputs/evidence_report.md",
         "python scripts/build_evidence_bundle.py --index outputs/evidence_index.json "
         "--report outputs/evidence_report.md",
+        "python scripts/validate_evidence_bundle.py outputs/evidence_bundle.json",
         "artifact_manifest.json",
         "release_provenance.json",
         "docs/release_v0_1.md",

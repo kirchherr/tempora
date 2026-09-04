@@ -77,6 +77,12 @@ Build a checksum manifest for the index and report:
 python scripts/build_evidence_bundle.py --index outputs/evidence_index.json --report outputs/evidence_report.md
 ```
 
+Validate that the bundle still matches local evidence artifacts:
+
+```bash
+python scripts/validate_evidence_bundle.py outputs/evidence_bundle.json
+```
+
 The index and report commands write:
 
 ```text
@@ -98,7 +104,8 @@ of generated runs.
 - certificate failure records are malformed,
 - report rendering fails when the evidence index is invalid,
 - report validation fails when the saved report is stale,
-- bundle manifest generation fails when the report and index do not match.
+- bundle manifest generation fails when the report and index do not match,
+- bundle validation fails when indexed artifact hashes are stale.
 
 ## Reproducibility Notes
 
